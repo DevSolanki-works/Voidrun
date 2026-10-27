@@ -38,17 +38,7 @@
           Start: Play the game
         </button>
 
-        <button id="btn-menu-challenge" class="menu-btn btn-challenge">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>
-          ⚔️ Human vs AI Challenge
-        </button>
-
-        <button id="btn-menu-lab" class="menu-btn btn-secondary">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          See the AI learn
-        </button>
-
-        <button id="btn-menu-watch" class="menu-btn">
+        <button id="btn-menu-watch" class="menu-btn btn-secondary">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
           Watch the AI play
         </button>
@@ -61,6 +51,11 @@
         <button id="btn-menu-settings" class="menu-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Settings
+        </button>
+
+        <button id="btn-reset-data" class="menu-btn btn-danger-outline" title="Clear all scores and history for a fresh professor demo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          Reset Demo Data
         </button>
       </div>
 
@@ -78,12 +73,11 @@
             </div>
             <div class="chk-desc">Learns baseline obstacle clearance and boundary awareness.</div>
             <div class="chk-stat-row">
-              <span>Best Survival: <strong>71.0s</strong></span>
-              <span>Fitness: <strong>8,002</strong></span>
+              <span>Best Survival: <strong id="chk-survival-100">71.0s</strong></span>
+              <span>Fitness: <strong id="chk-fitness-100">8,002</strong></span>
             </div>
             <div class="chk-actions">
-              <button class="btn-chk-watch" data-gen="100">Watch AI</button>
-              <button class="btn-chk-challenge" data-gen="100">Challenge</button>
+              <button class="btn-chk-watch" data-gen="100" style="width: 100%;">Watch AI Pilot</button>
             </div>
           </div>
 
@@ -94,12 +88,11 @@
             </div>
             <div class="chk-desc">Active multi-threat dodging, tactical centering, and wave scaling.</div>
             <div class="chk-stat-row">
-              <span>Best Survival: <strong>136.3s</strong></span>
-              <span>Fitness: <strong>17,564</strong></span>
+              <span>Best Survival: <strong id="chk-survival-500">118.5s</strong></span>
+              <span>Fitness: <strong id="chk-fitness-500">14,280</strong></span>
             </div>
             <div class="chk-actions">
-              <button class="btn-chk-watch" data-gen="500">Watch AI</button>
-              <button class="btn-chk-challenge" data-gen="500">Challenge</button>
+              <button class="btn-chk-watch" data-gen="500" style="width: 100%;">Watch AI Pilot</button>
             </div>
           </div>
 
@@ -110,12 +103,11 @@
             </div>
             <div class="chk-desc">Evolved policy: high-speed trajectory evasion and predictive dodging.</div>
             <div class="chk-stat-row">
-              <span>Best Survival: <strong>136.3s</strong></span>
-              <span>Fitness: <strong>17,564</strong></span>
+              <span>Best Survival: <strong id="chk-survival-1000">174.2s</strong></span>
+              <span>Fitness: <strong id="chk-fitness-1000">22,650</strong></span>
             </div>
             <div class="chk-actions">
-              <button class="btn-chk-watch" data-gen="1000">Watch AI</button>
-              <button class="btn-chk-challenge" data-gen="1000">Challenge</button>
+              <button class="btn-chk-watch" data-gen="1000" style="width: 100%;">Watch AI Pilot</button>
             </div>
           </div>
         </div>
@@ -177,6 +169,15 @@
 
       <!-- Adaptive Director Warning Ticker -->
       <div id="hud-director-banner" class="hud-director-banner" style="display: none;"></div>
+
+      <!-- Live Achievement Toast (drops down when AI beats human record) -->
+      <div id="hud-achievement-toast" class="achievement-toast" style="display: none;">
+        <span class="toast-trophy">🏆</span>
+        <div class="toast-body">
+          <span class="toast-title">HUMAN RECORD SURPASSED!</span>
+          <span id="toast-desc" class="toast-sub">Autonomous pilot has officially out-survived your personal record!</span>
+        </div>
+      </div>
 
       <!-- Main Canvas Container (800x600 Aspect Ratio) -->
       <div class="canvas-container">
@@ -521,6 +522,15 @@
     <div class="modal-card">
       <h2 class="modal-title title-danger">RUN TERMINATED</h2>
       <p id="go-reason" class="modal-subtitle">Destroyed by asteroid hazard</p>
+
+      <!-- AI Surpassed Human Achievement Banner -->
+      <div id="go-ai-achievement" class="achievement-banner" style="display: none;">
+        <div class="achievement-icon">🏆</div>
+        <div class="achievement-text-box">
+          <div class="achievement-badge-title">ACHIEVEMENT: AI DEFEATED HUMAN RECORD!</div>
+          <div id="go-ai-achievement-desc" class="achievement-sub">The autonomous controller out-survived your best flight record!</div>
+        </div>
+      </div>
 
       <div class="stats-grid">
         <div class="stat-item">
