@@ -183,7 +183,23 @@
       <div class="canvas-container">
         <canvas id="game-canvas" width="800" height="600"></canvas>
       </div>
-      <p class="arena-control-help">Steer with <strong>WASD</strong> or the <strong>arrow keys</strong>. You can also click and hold, or touch and drag, in the arena to fly toward that point.</p>
+
+      <!-- On-Screen Touch Controls (Multi-touch enabled D-Pad for mobile & touchscreens) -->
+      <div id="mobile-controls" class="mobile-controls-pad">
+        <div class="dpad-row">
+          <button type="button" class="dpad-btn dpad-up" data-dir="up" aria-label="Thrust Up">▲</button>
+        </div>
+        <div class="dpad-row dpad-mid-row">
+          <button type="button" class="dpad-btn dpad-left" data-dir="left" aria-label="Thrust Left">◀</button>
+          <div class="dpad-center-hub">THRUST</div>
+          <button type="button" class="dpad-btn dpad-right" data-dir="right" aria-label="Thrust Right">▶</button>
+        </div>
+        <div class="dpad-row">
+          <button type="button" class="dpad-btn dpad-down" data-dir="down" aria-label="Thrust Down">▼</button>
+        </div>
+      </div>
+
+      <p class="arena-control-help">Steer with <strong>WASD</strong>, <strong>arrow keys</strong>, the on-screen <strong>D-pad</strong>, or click &amp; drag inside the arena.</p>
 
       <!-- AI Insight Telemetry & Decision Panel (Visible in AI Insight Mode) -->
       <div id="ai-insight-panel" class="ai-insight-panel" style="display: none;">
@@ -407,6 +423,19 @@
               <span class="elim-title">ELIMINATED</span>
               <span id="elim-human-time" class="elim-stat">Survived: 0.0s</span>
               <button id="btn-chal-skip-results" class="hud-btn" style="margin-top: 10px; font-size: 0.75rem;">End Match & Compare</button>
+            </div>
+          </div>
+          <div id="chal-mobile-controls" class="mobile-controls-pad" style="margin: 8px auto 0;">
+            <div class="dpad-row">
+              <button type="button" class="dpad-btn dpad-up" data-dir="up" aria-label="Thrust Up">▲</button>
+            </div>
+            <div class="dpad-row dpad-mid-row">
+              <button type="button" class="dpad-btn dpad-left" data-dir="left" aria-label="Thrust Left">◀</button>
+              <div class="dpad-center-hub">YOU</div>
+              <button type="button" class="dpad-btn dpad-right" data-dir="right" aria-label="Thrust Right">▶</button>
+            </div>
+            <div class="dpad-row">
+              <button type="button" class="dpad-btn dpad-down" data-dir="down" aria-label="Thrust Down">▼</button>
             </div>
           </div>
         </div>

@@ -59,6 +59,9 @@ class App {
       right: false
     };
     this.pointerTarget = null;
+    this.pointerActive = false;
+    this.challengePointerTarget = null;
+    this.challengePointerActive = false;
 
     this.isPaused = false;
     this.animationFrameId = null;
