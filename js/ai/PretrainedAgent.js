@@ -4,9 +4,13 @@
  * Ships pre-trained checkpoints for Gen 100, Gen 500, and Gen 1000.
  */
 
-import { CHECKPOINTS, PRETRAINED_GENOME_100, PRETRAINED_GENOME_500, PRETRAINED_GENOME_1000 } from './PretrainedCheckpoints.js';
+import { CHECKPOINTS } from './PretrainedCheckpoints.js';
 
-export { CHECKPOINTS, PRETRAINED_GENOME_100, PRETRAINED_GENOME_500, PRETRAINED_GENOME_1000 };
+export const PRETRAINED_GENOME_100 = CHECKPOINTS.gen100.weights;
+export const PRETRAINED_GENOME_500 = CHECKPOINTS.gen500.weights;
+export const PRETRAINED_GENOME_1000 = CHECKPOINTS.gen1000.weights;
+
+export { CHECKPOINTS };
 
 // Default demonstration agent corresponds to Apex Checkpoint (Gen 1000)
 export const PRETRAINED_GENOME = PRETRAINED_GENOME_1000;

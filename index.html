@@ -73,8 +73,8 @@
             </div>
             <div class="chk-desc">Learns baseline obstacle clearance and boundary awareness.</div>
             <div class="chk-stat-row">
-              <span>Best Survival: <strong id="chk-survival-100">71.0s</strong></span>
-              <span>Fitness: <strong id="chk-fitness-100">8,002</strong></span>
+              <span>Best Survival: <strong id="chk-survival-100">47.1s</strong></span>
+              <span>Fitness: <strong id="chk-fitness-100">12,265</strong></span>
             </div>
             <div class="chk-actions">
               <button class="btn-chk-watch" data-gen="100" style="width: 100%;">Watch AI Pilot</button>
@@ -88,8 +88,8 @@
             </div>
             <div class="chk-desc">Active multi-threat dodging, tactical centering, and wave scaling.</div>
             <div class="chk-stat-row">
-              <span>Best Survival: <strong id="chk-survival-500">118.5s</strong></span>
-              <span>Fitness: <strong id="chk-fitness-500">14,280</strong></span>
+              <span>Best Survival: <strong id="chk-survival-500">80.6s</strong></span>
+              <span>Fitness: <strong id="chk-fitness-500">19,545</strong></span>
             </div>
             <div class="chk-actions">
               <button class="btn-chk-watch" data-gen="500" style="width: 100%;">Watch AI Pilot</button>
@@ -103,8 +103,8 @@
             </div>
             <div class="chk-desc">Evolved policy: high-speed trajectory evasion and predictive dodging.</div>
             <div class="chk-stat-row">
-              <span>Best Survival: <strong id="chk-survival-1000">174.2s</strong></span>
-              <span>Fitness: <strong id="chk-fitness-1000">22,650</strong></span>
+              <span>Best Survival: <strong id="chk-survival-1000">120.6s</strong></span>
+              <span>Fitness: <strong id="chk-fitness-1000">24,045</strong></span>
             </div>
             <div class="chk-actions">
               <button class="btn-chk-watch" data-gen="1000" style="width: 100%;">Watch AI Pilot</button>
@@ -304,15 +304,15 @@
         <div class="lab-checkpoints-row">
           <button type="button" class="lab-chk-btn" data-gen="100">
             <strong>Gen 100</strong>
-            <span>Novice (71.0s)</span>
+            <span>Novice (47.1s)</span>
           </button>
           <button type="button" class="lab-chk-btn" data-gen="500">
             <strong>Gen 500</strong>
-            <span>Advanced (136.3s)</span>
+            <span>Advanced (80.6s)</span>
           </button>
           <button type="button" class="lab-chk-btn highlight" data-gen="1000">
             <strong>Gen 1000</strong>
-            <span>Apex (136.3s)</span>
+            <span>Apex (120.6s)</span>
           </button>
         </div>
       </section>
@@ -787,17 +787,149 @@
 
       <!-- Section 2: Sensory Inputs & Topology -->
       <div class="academic-section">
-        <h3>2. NEURAL NETWORK SENSORY PERCEPTION</h3>
+        <h3>2. THE AI'S 180px SENSORY RADIUS & RADAR SYSTEM (EXPLAINED SIMPLY)</h3>
         <p>
-          The rocket controller is a Multi-Layer Perceptron (MLP) with <strong>20 normalized input features</strong>, <strong>16 hidden neurons</strong> (with <em>tanh</em> non-linear activations), and <strong>4 output units</strong> (logistic sigmoid) representing directional thrust vectors.
+          How does the autonomous pilot actually perceive the game and make split-second decisions? Instead of giving the AI unrealistic vision of the entire screen, it uses a realistic <strong>180-pixel sensory radar horizon</strong>, mimicking real LiDAR and radar sensors on autonomous drones and self-driving vehicles.
         </p>
-        <div class="formula-box">
-          Input Vector [20]:<br />
-          • Rocket Normalized Position (x, y) & Velocity (vx, vy) [4]<br />
-          • Normalized Clearances to Arena Boundaries (Left, Right, Top, Bottom) [4]<br />
-          • 8-Directional 360° Proximity Radar Rays (d1 .. d8 &in; [0, 1]) [8]<br />
-          • Nearest Threat Relative Vector (&Delta;x, &Delta;y), Distance & Relative Velocity [4]<br /><br />
-          Output Vector [4] &rarr; Throttle: X = out[1] - out[0], Y = out[3] - out[2] &in; [-1.0, 1.0]
+
+        <!-- Visual Diagram 1: 180px Sensory Horizon & Radar Scan -->
+        <div class="diagram-card">
+          <svg class="diagram-svg" viewBox="0 0 540 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="540" height="340" rx="10" fill="#0b0b0e" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+            
+            <!-- Outer Arena Walls -->
+            <rect x="25" y="25" width="490" height="290" fill="none" stroke="rgba(255,255,255,0.18)" stroke-dasharray="4 4" stroke-width="1"/>
+            <text x="35" y="42" fill="#71717a" font-family="'JetBrains Mono', monospace" font-size="10">ARENA BOUNDARY WALLS</text>
+
+            <!-- 180px Sensory Horizon Circle -->
+            <circle cx="270" cy="170" r="115" fill="rgba(255,255,255,0.02)" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="6 6"/>
+            <text x="270" y="48" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700">180px SENSORY HORIZON (RADAR DETECTION BUBBLE)</text>
+
+            <!-- 8 Radar Rays -->
+            <!-- E (0°) -->
+            <line x1="270" y1="170" x2="385" y2="170" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="395" y="174" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="9">E (0°)</text>
+
+            <!-- SE (45°) -->
+            <line x1="270" y1="170" x2="351" y2="251" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="358" y="262" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="9">SE (45°)</text>
+
+            <!-- S (90°) -->
+            <line x1="270" y1="170" x2="270" y2="285" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="270" y="299" text-anchor="middle" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="9">S (90°)</text>
+
+            <!-- SW (135°) -->
+            <line x1="270" y1="170" x2="189" y2="251" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="165" y="262" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="9">SW (135°)</text>
+
+            <!-- W (180°) -->
+            <line x1="270" y1="170" x2="155" y2="170" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="110" y="174" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="9">W (180°)</text>
+
+            <!-- NW (225°) - Detected Danger Ray! -->
+            <line x1="270" y1="170" x2="205" y2="105" stroke="#ef4444" stroke-width="2.5"/>
+            <circle cx="205" cy="105" r="5" fill="#ef4444"/>
+            <circle cx="205" cy="105" r="11" fill="none" stroke="#ef4444" stroke-width="1" stroke-dasharray="2 2"/>
+            <text x="115" y="98" fill="#ef4444" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700">IN RANGE! (d = 0.45)</text>
+
+            <!-- N (270°) -->
+            <line x1="270" y1="170" x2="270" y2="55" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="270" y="68" text-anchor="middle" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="9">N (270°)</text>
+
+            <!-- NE (315°) -->
+            <line x1="270" y1="170" x2="351" y2="89" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <text x="358" y="85" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="9">NE (315°)</text>
+
+            <!-- Distant Threat Outside Radius -->
+            <circle cx="430" cy="70" r="12" fill="#27272a" stroke="#71717a" stroke-width="1.5"/>
+            <text x="430" y="74" text-anchor="middle" fill="#a1a1aa" font-size="10">☄</text>
+            <text x="430" y="95" text-anchor="middle" fill="#71717a" font-family="'JetBrains Mono', monospace" font-size="9">Outside >180px (Ignored)</text>
+
+            <!-- Incoming Asteroid Inside Radius -->
+            <circle cx="205" cy="105" r="13" fill="#27272a" stroke="#ef4444" stroke-width="2"/>
+            <text x="205" y="109" text-anchor="middle" fill="#ffffff" font-size="10">☄</text>
+
+            <!-- Wall Clearance Arrows -->
+            <path d="M 270 170 L 270 30" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2 2"/>
+            <path d="M 270 170 L 510 170" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2 2"/>
+            <text x="440" y="162" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="8">Right Wall Clearance</text>
+
+            <!-- Rocket Ship Hull in Center -->
+            <polygon points="270,154 280,182 270,176 260,182" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+            <circle cx="270" cy="168" r="2.5" fill="#000000"/>
+
+            <!-- Resulting Evasive Action Vector -->
+            <line x1="270" y1="170" x2="310" y2="210" stroke="#ffffff" stroke-width="3"/>
+            <polygon points="314,214 300,210 308,202" fill="#ffffff"/>
+            <text x="318" y="224" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700">Chosen Evasion Vector</text>
+          </svg>
+          <div class="diagram-caption">Figure 1: The AI's 180px sensory radar horizon. Asteroids within 180px trigger proximity alarms along corresponding rays; distant obstacles are ignored until they enter the local danger bubble.</div>
+        </div>
+
+        <!-- Visual Diagram 2: Neural Decision Flowchart -->
+        <div class="diagram-card">
+          <svg class="diagram-svg" viewBox="0 0 540 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="540" height="220" rx="10" fill="#0b0b0e" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+            
+            <!-- Column 1: 20 Inputs -->
+            <rect x="20" y="25" width="130" height="170" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+            <text x="85" y="45" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700">20 SENSORY INPUTS</text>
+            <text x="30" y="70" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Position (x, y) [2]</text>
+            <text x="30" y="90" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Velocity (vx, vy) [2]</text>
+            <text x="30" y="110" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Wall Distances [4]</text>
+            <text x="30" y="130" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• 8 Radar Rays [8]</text>
+            <text x="30" y="150" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Nearest Threat [4]</text>
+            <text x="85" y="180" text-anchor="middle" fill="#71717a" font-family="'JetBrains Mono', monospace" font-size="8">Normalized [0.0 to 1.0]</text>
+
+            <!-- Arrows to Hidden -->
+            <path d="M 150 110 L 195 110" stroke="#ffffff" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+            <!-- Column 2: 16 Hidden Neurons -->
+            <rect x="200" y="25" width="140" height="170" rx="6" fill="rgba(255,255,255,0.06)" stroke="#ffffff" stroke-width="1.5"/>
+            <text x="270" y="45" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700">16 HIDDEN NEURONS</text>
+            <text x="270" y="75" text-anchor="middle" fill="#f59e0b" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600">404 Evolvable Weights</text>
+            <text x="212" y="105" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8">• Danger Weighting</text>
+            <text x="212" y="125" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8">• Escape Trajectory Math</text>
+            <text x="212" y="145" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8">• Boundary Anti-Trap</text>
+            <text x="270" y="180" text-anchor="middle" fill="#71717a" font-family="'JetBrains Mono', monospace" font-size="8">Tanh Non-Linearity</text>
+
+            <!-- Arrows to Output -->
+            <path d="M 340 110 L 385 110" stroke="#ffffff" stroke-width="1.5"/>
+
+            <!-- Column 3: 4 Outputs & Actuation -->
+            <rect x="390" y="25" width="130" height="170" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+            <text x="455" y="45" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700">4 MOTOR OUTPUTS</text>
+            <text x="405" y="75" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Thrust Left</text>
+            <text x="405" y="95" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Thrust Right</text>
+            <text x="405" y="115" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Thrust Up</text>
+            <text x="405" y="135" fill="#a1a1aa" font-family="'JetBrains Mono', monospace" font-size="8.5">• Thrust Down</text>
+            <rect x="400" y="155" width="110" height="26" rx="4" fill="#ffffff"/>
+            <text x="455" y="172" text-anchor="middle" fill="#000000" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="800">Net Throttle [tx, ty]</text>
+          </svg>
+          <div class="diagram-caption">Figure 2: Information pipeline. 20 normalized sensory observations feed into 16 hidden neurons with evolved weights, outputting continuous 2-axis steering force.</div>
+        </div>
+
+        <!-- 4 Plain-Language Explainer Cards -->
+        <div class="simple-explainer-grid">
+          <div class="simple-card">
+            <h4>🎯 Why a 180px Radius?</h4>
+            <p>Real-world self-driving cars and drones don't have god-like vision across the whole city—they rely on finite radar/LiDAR. Setting an exact 180px detection bubble forces the AI to learn genuine local reaction reflexes, centering habits, and collision avoidance rather than unrealistic full-screen memorization.</p>
+          </div>
+
+          <div class="simple-card">
+            <h4>📡 How Danger is Calculated</h4>
+            <p>Every frame (60 times a second), the rocket sweeps 8 directional rays. If no asteroid is near, a ray outputs 1.0 (100% clear). When an asteroid enters the 180px zone, that ray's value drops towards 0.0, signaling immediate danger from that exact angle.</p>
+          </div>
+
+          <div class="simple-card">
+            <h4>🧠 How the AI Decides to Move</h4>
+            <p>The 20 sensory numbers enter the neural brain and are multiplied by 404 learned connection weights. These weights act like instincts: for example, a high weight says <em>"If a hazard approaches from North, immediately fire Downward thrusters to dodge!"</em></p>
+          </div>
+
+          <div class="simple-card">
+            <h4>🧬 How Evolution Trains It</h4>
+            <p>At Generation 0, weights are randomized, so the AI crashes in ~3 seconds. The Genetic Algorithm tests 36 pilots, saves the ones that survived longest, combines their brains (crossover), adds small mutations (new instincts), and repeats. By Gen 500–1000, it masters high-speed evasion!</p>
+          </div>
         </div>
       </div>
 

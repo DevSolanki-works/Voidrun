@@ -311,6 +311,36 @@ class App {
       this.startHumanGame();
     };
 
+    const btnResetData = document.getElementById('btn-reset-data');
+    if (btnResetData) {
+      btnResetData.onclick = () => {
+        sound.playButtonClick();
+        const ok = confirm(
+          'RESET ALL DATA & HISTORICAL SCORES?\n\nThis will clear all saved flight records, high scores, and custom training weights so you can present a fresh, clean demo to your professor.\n\nProceed?'
+        );
+        if (ok) {
+          Storage.clearAllData();
+          this.ga.reset();
+          this.ga.targetSurvivalTicks = 0;
+          this.sessionPhase = 'human';
+          this.aiTargetTime = 0;
+          this.aiAchievementTriggered = false;
+          if (this.lab) {
+            this.lab.updateMetrics();
+            this.lab.chart.render([]);
+            this.lab.updateGuidedProgress();
+          }
+          this.updateTitleBadges();
+          const badge = document.getElementById('menu-status-badge');
+          if (badge) {
+            badge.textContent = 'Fresh Demo Ready (0.0s Record)';
+            badge.className = 'status-badge badge-ready';
+          }
+          alert('✓ Demo session cleared!\n\nAll historical data has been reset to zero. You can now present from a clean slate.');
+        }
+      };
+    }
+
     const btnMenuChallenge = document.getElementById('btn-menu-challenge');
     if (btnMenuChallenge) {
       btnMenuChallenge.onclick = () => {
@@ -590,6 +620,13 @@ class App {
     const recordGoal = document.getElementById('hud-record-goal');
     if (recordGoal) recordGoal.style.display = 'none';
 
+    this.aiAchievementTriggered = false;
+    const toast = document.getElementById('hud-achievement-toast');
+    if (toast) {
+      toast.classList.remove('visible');
+      toast.style.display = 'none';
+    }
+
     // Apply gameplay settings
     this.sim.setDifficulty(this.settings.difficulty);
     this.sim.setAdaptiveMode(this.settings.adaptiveArena);
@@ -668,6 +705,13 @@ class App {
       recordTime.textContent = personalBest > 0
         ? `${Math.floor(personalBest / 60).toString().padStart(2, '0')}:${(personalBest % 60).toFixed(1).padStart(4, '0')}`
         : 'Set a record!';
+    }
+
+    this.aiAchievementTriggered = false;
+    const toast = document.getElementById('hud-achievement-toast');
+    if (toast) {
+      toast.classList.remove('visible');
+      toast.style.display = 'none';
     }
 
     // Apply gameplay settings
@@ -1014,11 +1058,31 @@ class App {
     }
 
     if (this.gameMode === 'ai-watch' && this.aiTargetTime > 0) {
+      const isBeaten = this.sim.ticks / 60 > this.aiTargetTime;
       const recordLabel = document.getElementById('hud-record-label');
       if (recordLabel) {
-        recordLabel.textContent = this.sim.ticks / 60 > this.aiTargetTime
+        recordLabel.textContent = isBeaten
           ? 'Your record beaten!'
           : 'Your best to beat';
+      }
+
+      // Trigger achievement toast the moment AI surpasses human record
+      if (isBeaten && !this.aiAchievementTriggered) {
+        this.aiAchievementTriggered = true;
+        sound.playWaveAdvance();
+        const toast = document.getElementById('hud-achievement-toast');
+        const toastDesc = document.getElementById('toast-desc');
+        if (toast) {
+          if (toastDesc) {
+            toastDesc.textContent = `Autonomous pilot out-survived your record (${this.aiTargetTime.toFixed(1)}s)! Now setting an all-time record!`;
+          }
+          toast.style.display = 'flex';
+          toast.classList.add('visible');
+          setTimeout(() => {
+            toast.classList.remove('visible');
+            setTimeout(() => { toast.style.display = 'none'; }, 600);
+          }, 4500);
+        }
       }
     }
 
@@ -1051,6 +1115,19 @@ class App {
     const playerBestValue = document.getElementById('go-player-best');
     const saveButton = document.getElementById('btn-go-save-agent');
     const playerBest = Number(Storage.loadHighScore().survivalTime) || 0;
+    const aiSec = Number((this.sim.ticks / 60).toFixed(1));
+    const aiAchievementBanner = document.getElementById('go-ai-achievement');
+    const aiAchievementDesc = document.getElementById('go-ai-achievement-desc');
+
+    if (this.gameMode === 'ai-watch' && playerBest > 0 && aiSec > playerBest) {
+      if (aiAchievementBanner) aiAchievementBanner.style.display = 'flex';
+      if (aiAchievementDesc) {
+        const diff = (aiSec - playerBest).toFixed(1);
+        aiAchievementDesc.textContent = `The autonomous AI defeated your flight record by +${diff}s! (AI: ${aiSec}s vs Human: ${playerBest.toFixed(1)}s)`;
+      }
+    } else {
+      if (aiAchievementBanner) aiAchievementBanner.style.display = 'none';
+    }
 
     if (saveButton) saveButton.style.display = 'none';
     if (exitButton) exitButton.textContent = 'Exit';

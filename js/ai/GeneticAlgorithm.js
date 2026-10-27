@@ -73,7 +73,8 @@ export class GeneticAlgorithm {
     });
 
     let ticks = 0;
-    while (!sim.gameOver) {
+    const maxEvalTicks = 12000; // 200s evaluation cutoff cap to prevent infinite loops
+    while (!sim.gameOver && ticks < maxEvalTicks) {
       sim.step(candidate.controller);
       ticks++;
     }

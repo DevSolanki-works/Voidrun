@@ -19,7 +19,13 @@ The application offers an interactive, dual-purpose experience:
 
 - **High-Contrast Monochrome & Respected Palette:** Clean black, crisp white, titanium silver, and respected functional amber/crimson cues—completely eliminating generic neon cyan/purple cyberpunk tropes for an academic, professional appearance.
 - **Simultaneous Human vs AI Challenge:** Head-to-head survival test in parallel arenas running side-by-side with identical procedural hazard seeds, equal 3-shield allocations, and detailed post-match scorecards.
-- **Pre-Trained Milestone Checkpoints (Gen 100, 500, 1000):** Real evolved neuro-controllers available for immediate testing, evaluation, and direct challenge without waiting for live training runs during college vivas.
+- **Pre-Trained Milestone Checkpoints (Gen 100, 500, 1000):** Real, progressively evolved neuro-controllers available for immediate demonstration:
+  - **Generation 100 (Novice Evasion):** 47.1s survival, 12,265 fitness score.
+  - **Generation 500 (Advanced Pilot):** 80.6s survival, 19,545 fitness score.
+  - **Generation 1000 (Apex Master):** 120.6s survival, 24,045 fitness score.
+- **One-Click Demo Reset (Viva Presentation Ready):** Prominent "Reset Demo Data" action on the start screen that wipes local storage, high scores, and trained models, giving a clean 0.0s baseline before presenting to professors.
+- **Surpassed Human Achievement System:** In-flight celebration toast and results modal achievement banner when an evolved neuro-controller outlasts the human player's personal record.
+- **Educational Visual Diagrams:** Interactive SVG perception and neural pipeline diagrams in the academic guide explaining the 180px sensory radar horizon and decision mathematics in accessible, simple terms.
 - **User-Defined Generation Training:** Full flexibility to specify any generation count from 1 to 1000 with interactive steppers (`+10`, `+25`, `+50`, `+100`) rather than arbitrary preset buttons.
 - **Parity AI Shields (3 Shields):** Autonomous agents receive 3 shields in both Watch and Challenge modes, matching the human pilot.
 - **Real-Time AI Calculation & Observation Overlay:** Deep insight mode displaying the pilot's 180px sensory radar rays, primary threat intercept, chosen net throttle action vector, and live telemetry.
