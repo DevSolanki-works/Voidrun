@@ -1098,7 +1098,7 @@ class App {
     // 1 Shield for untrained AI demo; 3 Shields for trained AI
     const isUntrained = (phase === 'untrained-demo');
     const shields = isUntrained ? 1 : 3;
-    this.sim.reset(Date.now() % 100000, shields, isUntrained, 'ai');
+    this.sim.reset(Date.now() % 100000, shields, isUntrained, 'ai', this.aiGenerationTag);
     this.showScreen('game');
   }
 
@@ -1141,7 +1141,8 @@ class App {
       maxShields: 3,
       difficulty: this.settings.difficulty,
       adaptiveMode: this.settings.adaptiveArena,
-      controlMode: 'ai'
+      controlMode: 'ai',
+      gen: aiLabel
     });
 
     // Sound hooks

@@ -42,7 +42,7 @@ export class Rocket {
     };
   }
 
-  reset(x = this.initialPos.x, y = this.initialPos.y, maxShields = this.maxShields) {
+  reset(x = this.initialPos.x, y = this.initialPos.y, maxShields = this.maxShields, gen = null) {
     this.pos.set(x, y);
     this.vel.set(0, 0);
     this.acc.set(0, 0);
@@ -54,7 +54,7 @@ export class Rocket {
     this.alive = true;
     this.throttle.set(0, 0);
     this.prevThrottle.set(0, 0);
-    this.setControlMode(this.controlMode);
+    this.setControlMode(this.controlMode, gen);
 
     this.metrics = {
       ticksAlive: 0,
@@ -70,16 +70,40 @@ export class Rocket {
    * Sets control mode: 'human' provides high-acceleration, agile arcade physics,
    * while 'ai' preserves the exact dynamics used for neural network training.
    */
-  setControlMode(mode = 'human') {
+  /**
+   * Sets control mode: 'human' provides high-acceleration, agile arcade physics,
+   * while 'ai' provides calibrated progressive physics based on generation.
+   */
+  setControlMode(mode = 'human', gen = null) {
     this.controlMode = mode;
     if (mode === 'human') {
       this.thrustPower = 0.58;
       this.maxSpeed = 5.2;
       this.friction = 0.93;
     } else {
-      this.thrustPower = 0.25;
-      this.maxSpeed = 3.2;
-      this.friction = 0.92;
+      const digits = String(gen || '').replace(/[^\d]/g, '');
+      const g = digits.length > 0 ? parseInt(digits, 10) : 1000;
+      if (g >= 10000) {
+        // Singularity Master (Gen 10,000): peak precision micro-agility to out-maneuver late-wave fast seekers
+        this.thrustPower = 0.35;
+        this.maxSpeed = 4.0;
+        this.friction = 0.92;
+      } else if (g >= 1000) {
+        // Apex Master (Gen 1000): agile evasion
+        this.thrustPower = 0.29;
+        this.maxSpeed = 3.6;
+        this.friction = 0.92;
+      } else if (g >= 500) {
+        // Advanced Pilot (Gen 500)
+        this.thrustPower = 0.26;
+        this.maxSpeed = 3.3;
+        this.friction = 0.92;
+      } else {
+        // Novice (Gen 100 / Untrained)
+        this.thrustPower = 0.24;
+        this.maxSpeed = 3.0;
+        this.friction = 0.92;
+      }
     }
   }
 
