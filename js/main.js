@@ -58,6 +58,7 @@ class App {
       left: false,
       right: false
     };
+    this.pointerTarget = null;
 
     this.isPaused = false;
     this.animationFrameId = null;
@@ -526,48 +527,86 @@ class App {
   }
 
   bindInputs() {
-    window.addEventListener('keydown', (e) => {
+    const controlForEvent = (e) => {
+      const code = e.code || '';
+      const key = (e.key || '').toLowerCase();
+      const legacyCode = e.keyCode || e.which;
+      if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w' || legacyCode === 38 || legacyCode === 87) return 'up';
+      if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's' || legacyCode === 40 || legacyCode === 83) return 'down';
+      if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a' || legacyCode === 37 || legacyCode === 65) return 'left';
+      if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd' || legacyCode === 39 || legacyCode === 68) return 'right';
+      return null;
+    };
+
+    // Capture at document level so focused buttons and browser layout differences
+    // cannot swallow movement input while the game is active.
+    document.addEventListener('keydown', (e) => {
       // Use physical key codes so controls behave consistently across keyboard layouts.
-      const movementKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
-      if (movementKeys.includes(e.code) || e.code === 'Space') {
+      const direction = controlForEvent(e);
+      const key = (e.key || '').toLowerCase();
+      if (direction || e.code === 'Space' || e.key === ' ') {
         e.preventDefault();
       }
 
-      if (movementKeys.includes(e.code)) {
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') this.keys.up = true;
-        if (e.code === 'ArrowDown' || e.code === 'KeyS') this.keys.down = true;
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = true;
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = true;
-      }
+      if (direction) this.keys[direction] = true;
 
-      if (!e.repeat && (e.code === 'KeyP' || e.code === 'Escape')) {
+      if (!e.repeat && ((e.code || '').toLowerCase() === 'keyp' || key === 'p' || e.key === 'Escape')) {
         if (this.currentScreen === 'game') {
           this.togglePause();
         }
       }
 
-      if (!e.repeat && e.code === 'KeyM') {
+      if (!e.repeat && ((e.code || '').toLowerCase() === 'keym' || key === 'm')) {
         const btnMute = document.getElementById('btn-hud-mute');
         if (btnMute) btnMute.click();
       }
 
-      if (!e.repeat && e.code === 'KeyV') {
+      if (!e.repeat && ((e.code || '').toLowerCase() === 'keyv' || key === 'v')) {
         const btnViewMode = document.getElementById('btn-hud-viewmode');
         if (btnViewMode) btnViewMode.click();
       }
-    });
+    }, true);
 
-    window.addEventListener('keyup', (e) => {
-      if (e.code === 'ArrowUp' || e.code === 'KeyW') this.keys.up = false;
-      if (e.code === 'ArrowDown' || e.code === 'KeyS') this.keys.down = false;
-      if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
-      if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
-    });
+    document.addEventListener('keyup', (e) => {
+      const direction = controlForEvent(e);
+      if (direction) this.keys[direction] = false;
+    }, true);
 
     window.addEventListener('blur', () => this.clearMovementKeys());
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) this.clearMovementKeys();
     });
+
+    // Point-and-hold steering doubles as a mouse and touch control scheme.
+    this.canvas.tabIndex = 0;
+    this.canvas.setAttribute('aria-label', 'Game arena. Use WASD, arrow keys, or drag to steer.');
+    this.canvas.addEventListener('pointerdown', (e) => {
+      if (this.currentScreen !== 'game' || this.gameMode !== 'human') return;
+      e.preventDefault();
+      this.canvas.focus({ preventScroll: true });
+      this.canvas.setPointerCapture(e.pointerId);
+      this.updatePointerTarget(e);
+    });
+    this.canvas.addEventListener('pointermove', (e) => {
+      if (this.pointerTarget && this.canvas.hasPointerCapture(e.pointerId)) {
+        this.updatePointerTarget(e);
+      }
+    });
+    const releasePointer = (e) => {
+      if (this.canvas.hasPointerCapture(e.pointerId)) this.canvas.releasePointerCapture(e.pointerId);
+      this.pointerTarget = null;
+    };
+    this.canvas.addEventListener('pointerup', releasePointer);
+    this.canvas.addEventListener('pointercancel', releasePointer);
+    this.canvas.addEventListener('lostpointercapture', () => { this.pointerTarget = null; });
+  }
+
+  updatePointerTarget(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    this.pointerTarget = {
+      x: ((e.clientX - rect.left) / rect.width) * this.sim.width,
+      y: ((e.clientY - rect.top) / rect.height) * this.sim.height
+    };
   }
 
   clearMovementKeys() {
@@ -626,6 +665,7 @@ class App {
 
   startHumanGame() {
     this.clearMovementKeys();
+    this.pointerTarget = null;
     this.sessionPhase = 'human';
     this.ga.reset();
     this.ga.targetSurvivalTicks = Math.round(Storage.loadHighScore().survivalTime * 60);
@@ -1038,6 +1078,16 @@ class App {
         if (this.keys.right) tx += 1;
         if (this.keys.up) ty -= 1;
         if (this.keys.down) ty += 1;
+
+        if (this.pointerTarget) {
+          const dx = this.pointerTarget.x - this.sim.rocket.pos.x;
+          const dy = this.pointerTarget.y - this.sim.rocket.pos.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance > 8) {
+            tx = dx / distance;
+            ty = dy / distance;
+          }
+        }
 
         if (tx !== 0 || ty !== 0) {
           sound.playThrust();
