@@ -534,24 +534,50 @@ class App {
       const code = e.code || '';
       const key = (e.key || '').toLowerCase();
       const legacyCode = e.keyCode || e.which;
-      if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w' || legacyCode === 38 || legacyCode === 87) return 'up';
-      if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's' || legacyCode === 40 || legacyCode === 83) return 'down';
-      if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a' || legacyCode === 37 || legacyCode === 65) return 'left';
-      if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd' || legacyCode === 39 || legacyCode === 68) return 'right';
+      if (
+        code === 'ArrowUp' || code === 'KeyW' ||
+        key === 'arrowup' || key === 'w' || key === 'z' ||
+        legacyCode === 38 || legacyCode === 87
+      ) return 'up';
+      if (
+        code === 'ArrowDown' || code === 'KeyS' ||
+        key === 'arrowdown' || key === 's' ||
+        legacyCode === 40 || legacyCode === 83
+      ) return 'down';
+      if (
+        code === 'ArrowLeft' || code === 'KeyA' ||
+        key === 'arrowleft' || key === 'a' || key === 'q' ||
+        legacyCode === 37 || legacyCode === 65
+      ) return 'left';
+      if (
+        code === 'ArrowRight' || code === 'KeyD' ||
+        key === 'arrowright' || key === 'd' ||
+        legacyCode === 39 || legacyCode === 68
+      ) return 'right';
       return null;
     };
 
     // Capture at document level so focused buttons and browser layout differences
     // cannot swallow movement input while the game is active.
     document.addEventListener('keydown', (e) => {
-      // Use physical key codes so controls behave consistently across keyboard layouts.
-      const direction = controlForEvent(e);
-      const key = (e.key || '').toLowerCase();
-      if (direction || e.code === 'Space' || e.key === ' ') {
-        e.preventDefault();
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) {
+        return;
       }
 
-      if (direction) this.keys[direction] = true;
+      const direction = controlForEvent(e);
+      const key = (e.key || '').toLowerCase();
+
+      if (direction) {
+        e.preventDefault();
+        this.keys[direction] = true;
+        // Keyboard takes priority over any active pointer dragging
+        this.pointerActive = false;
+        this.pointerTarget = null;
+        this.challengePointerActive = false;
+        this.challengePointerTarget = null;
+      } else if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+      }
 
       if (!e.repeat && ((e.code || '').toLowerCase() === 'keyp' || key === 'p' || e.key === 'Escape')) {
         if (this.currentScreen === 'game') {
@@ -572,7 +598,9 @@ class App {
 
     document.addEventListener('keyup', (e) => {
       const direction = controlForEvent(e);
-      if (direction) this.keys[direction] = false;
+      if (direction) {
+        this.keys[direction] = false;
+      }
     }, true);
 
     window.addEventListener('blur', () => this.clearMovementKeys());
@@ -580,35 +608,148 @@ class App {
       if (document.hidden) this.clearMovementKeys();
     });
 
+    // Helper to extract sanitized coordinates from pointer or touch events
+    const getPointerCoords = (e, canvas, sim) => {
+      if (!canvas || !sim) return null;
+      const rect = canvas.getBoundingClientRect();
+      if (!rect || rect.width <= 0 || rect.height <= 0) return null;
+      let clientX = e.clientX;
+      let clientY = e.clientY;
+      if (clientX === undefined && e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
+      if (clientX === undefined) return null;
+      return {
+        x: Math.max(0, Math.min(sim.width, ((clientX - rect.left) / rect.width) * sim.width)),
+        y: Math.max(0, Math.min(sim.height, ((clientY - rect.top) / rect.height) * sim.height))
+      };
+    };
+
     // Point-and-hold steering doubles as a mouse and touch control scheme.
     this.canvas.tabIndex = 0;
-    this.canvas.setAttribute('aria-label', 'Game arena. Use WASD, arrow keys, or drag to steer.');
-    this.canvas.addEventListener('pointerdown', (e) => {
+    this.canvas.setAttribute('aria-label', 'Game arena. Use WASD, arrow keys, touch d-pad, or drag to steer.');
+
+    const onPointerDown = (e) => {
       if (this.currentScreen !== 'game' || this.gameMode !== 'human') return;
       e.preventDefault();
-      this.canvas.focus({ preventScroll: true });
-      this.canvas.setPointerCapture(e.pointerId);
-      this.updatePointerTarget(e);
-    });
-    this.canvas.addEventListener('pointermove', (e) => {
-      if (this.pointerTarget && this.canvas.hasPointerCapture(e.pointerId)) {
-        this.updatePointerTarget(e);
-      }
-    });
-    const releasePointer = (e) => {
-      if (this.canvas.hasPointerCapture(e.pointerId)) this.canvas.releasePointerCapture(e.pointerId);
+      try { this.canvas.focus({ preventScroll: true }); } catch (err) {}
+      this.pointerActive = true;
+      try {
+        if (e.pointerId !== undefined) this.canvas.setPointerCapture(e.pointerId);
+      } catch (err) {}
+      const coords = getPointerCoords(e, this.canvas, this.sim);
+      if (coords) this.pointerTarget = coords;
+    };
+
+    const onPointerMove = (e) => {
+      if (!this.pointerActive) return;
+      const coords = getPointerCoords(e, this.canvas, this.sim);
+      if (coords) this.pointerTarget = coords;
+    };
+
+    const onPointerUp = (e) => {
+      try {
+        if (e && e.pointerId !== undefined && this.canvas.hasPointerCapture && this.canvas.hasPointerCapture(e.pointerId)) {
+          this.canvas.releasePointerCapture(e.pointerId);
+        }
+      } catch (err) {}
+      this.pointerActive = false;
       this.pointerTarget = null;
     };
-    this.canvas.addEventListener('pointerup', releasePointer);
-    this.canvas.addEventListener('pointercancel', releasePointer);
-    this.canvas.addEventListener('lostpointercapture', () => { this.pointerTarget = null; });
+
+    this.canvas.addEventListener('pointerdown', onPointerDown);
+    this.canvas.addEventListener('pointermove', onPointerMove);
+    this.canvas.addEventListener('pointerup', onPointerUp);
+    this.canvas.addEventListener('pointercancel', onPointerUp);
+    this.canvas.addEventListener('lostpointercapture', () => {
+      this.pointerActive = false;
+      this.pointerTarget = null;
+    });
+
+    // Global release listeners on window so pointer release is NEVER lost
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('mouseup', onPointerUp);
+    window.addEventListener('touchend', onPointerUp);
+    window.addEventListener('touchcancel', onPointerUp);
+
+    // Challenge screen pointer support for human arena
+    const chalCanvas = document.getElementById('canvas-chal-human');
+    if (chalCanvas) {
+      chalCanvas.tabIndex = 0;
+      chalCanvas.addEventListener('pointerdown', (e) => {
+        if (this.currentScreen !== 'challenge') return;
+        e.preventDefault();
+        try { chalCanvas.focus({ preventScroll: true }); } catch (err) {}
+        this.challengePointerActive = true;
+        try {
+          if (e.pointerId !== undefined) chalCanvas.setPointerCapture(e.pointerId);
+        } catch (err) {}
+        const coords = getPointerCoords(e, chalCanvas, this.challengeHumanSim);
+        if (coords) this.challengePointerTarget = coords;
+      });
+      chalCanvas.addEventListener('pointermove', (e) => {
+        if (!this.challengePointerActive) return;
+        const coords = getPointerCoords(e, chalCanvas, this.challengeHumanSim);
+        if (coords) this.challengePointerTarget = coords;
+      });
+      const onChalPointerUp = (e) => {
+        try {
+          if (e && e.pointerId !== undefined && chalCanvas.hasPointerCapture && chalCanvas.hasPointerCapture(e.pointerId)) {
+            chalCanvas.releasePointerCapture(e.pointerId);
+          }
+        } catch (err) {}
+        this.challengePointerActive = false;
+        this.challengePointerTarget = null;
+      };
+      chalCanvas.addEventListener('pointerup', onChalPointerUp);
+      chalCanvas.addEventListener('pointercancel', onChalPointerUp);
+      window.addEventListener('pointerup', onChalPointerUp);
+      window.addEventListener('pointercancel', onChalPointerUp);
+    }
+
+    // Touch D-Pad buttons for mobile & touch displays
+    document.querySelectorAll('.dpad-btn').forEach((btn) => {
+      const dir = btn.dataset.dir;
+      if (!dir) return;
+
+      const press = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.keys[dir] = true;
+        btn.classList.add('active');
+        this.pointerActive = false;
+        this.pointerTarget = null;
+        this.challengePointerActive = false;
+        this.challengePointerTarget = null;
+        sound.playThrust();
+      };
+
+      const release = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.keys[dir] = false;
+        btn.classList.remove('active');
+      };
+
+      btn.addEventListener('pointerdown', press);
+      btn.addEventListener('pointerup', release);
+      btn.addEventListener('pointercancel', release);
+      btn.addEventListener('pointerleave', release);
+
+      btn.addEventListener('touchstart', press, { passive: false });
+      btn.addEventListener('touchend', release, { passive: false });
+      btn.addEventListener('touchcancel', release, { passive: false });
+    });
   }
 
   updatePointerTarget(e) {
     const rect = this.canvas.getBoundingClientRect();
+    if (!rect || rect.width <= 0 || rect.height <= 0) return;
     this.pointerTarget = {
-      x: ((e.clientX - rect.left) / rect.width) * this.sim.width,
-      y: ((e.clientY - rect.top) / rect.height) * this.sim.height
+      x: Math.max(0, Math.min(this.sim.width, ((e.clientX - rect.left) / rect.width) * this.sim.width)),
+      y: Math.max(0, Math.min(this.sim.height, ((e.clientY - rect.top) / rect.height) * this.sim.height))
     };
   }
 
@@ -617,6 +758,11 @@ class App {
     this.keys.down = false;
     this.keys.left = false;
     this.keys.right = false;
+    this.pointerActive = false;
+    this.pointerTarget = null;
+    this.challengePointerActive = false;
+    this.challengePointerTarget = null;
+    document.querySelectorAll('.dpad-btn.active').forEach((b) => b.classList.remove('active'));
   }
 
   updateTitleBadges() {
@@ -646,6 +792,11 @@ class App {
         this.hud.hideGameOver();
       }
       this.startLoop();
+      try {
+        window.focus();
+        const activeCanvas = screenName === 'game' ? this.canvas : document.getElementById('canvas-chal-human');
+        if (activeCanvas) activeCanvas.focus({ preventScroll: true });
+      } catch (err) {}
     } else {
       this.stopLoop();
     }
@@ -806,6 +957,7 @@ class App {
   }
 
   startChallengeMode(aiGenome = null, aiLabel = 'GEN 1000 APEX MODEL') {
+    this.clearMovementKeys();
     if (!aiGenome) {
       if (this.ga.bestGenome) {
         aiGenome = this.ga.bestGenome;
@@ -895,6 +1047,18 @@ class App {
       if (this.keys.right) tx += 1;
       if (this.keys.up) ty -= 1;
       if (this.keys.down) ty += 1;
+
+      // Pointer / touch drag steering in challenge mode
+      if (tx === 0 && ty === 0 && this.challengePointerActive && this.challengePointerTarget) {
+        const dx = this.challengePointerTarget.x - this.challengeHumanSim.rocket.pos.x;
+        const dy = this.challengePointerTarget.y - this.challengeHumanSim.rocket.pos.y;
+        const distance = Math.hypot(dx, dy);
+        if (distance > 12) {
+          tx = Math.max(-1, Math.min(1, dx / distance));
+          ty = Math.max(-1, Math.min(1, dy / distance));
+        }
+      }
+
       if (tx !== 0 || ty !== 0) sound.playThrust();
 
       this.challengeHumanSim.rocket.setThrottle(tx, ty);
@@ -1082,13 +1246,14 @@ class App {
         if (this.keys.up) ty -= 1;
         if (this.keys.down) ty += 1;
 
-        if (this.pointerTarget) {
+        // Pointer / touch drag steering applies ONLY when actively held AND no keyboard direction is pressed
+        if (tx === 0 && ty === 0 && this.pointerActive && this.pointerTarget) {
           const dx = this.pointerTarget.x - this.sim.rocket.pos.x;
           const dy = this.pointerTarget.y - this.sim.rocket.pos.y;
           const distance = Math.hypot(dx, dy);
-          if (distance > 8) {
-            tx = dx / distance;
-            ty = dy / distance;
+          if (distance > 12) {
+            tx = Math.max(-1, Math.min(1, dx / distance));
+            ty = Math.max(-1, Math.min(1, dy / distance));
           }
         }
 
