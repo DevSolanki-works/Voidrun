@@ -328,10 +328,13 @@ class App {
     );
 
     // Menu Screen Buttons
-    document.getElementById('btn-menu-play').onclick = () => {
-      sound.playButtonClick();
-      this.startHumanGame();
-    };
+    const btnMenuPlay = document.getElementById('btn-menu-play');
+    if (btnMenuPlay) {
+      btnMenuPlay.onclick = () => {
+        sound.playButtonClick();
+        this.startHumanGame();
+      };
+    }
 
     const btnResetData = document.getElementById('btn-reset-data');
     if (btnResetData) {
@@ -397,20 +400,29 @@ class App {
     const btnExitSession = document.getElementById('btn-exit-session');
     if (btnExitSession) btnExitSession.onclick = () => this.exitGuidedSession();
 
-    document.getElementById('btn-menu-lab').onclick = () => {
-      sound.playButtonClick();
-      this.showScreen('lab');
-    };
+    const btnMenuLab = document.getElementById('btn-menu-lab');
+    if (btnMenuLab) {
+      btnMenuLab.onclick = () => {
+        sound.playButtonClick();
+        this.showScreen('lab');
+      };
+    }
 
-    document.getElementById('btn-menu-watch').onclick = () => {
-      sound.playButtonClick();
-      this.startWatchBestDefault();
-    };
+    const btnMenuWatch = document.getElementById('btn-menu-watch');
+    if (btnMenuWatch) {
+      btnMenuWatch.onclick = () => {
+        sound.playButtonClick();
+        this.startWatchBestDefault();
+      };
+    }
 
-    document.getElementById('btn-menu-how').onclick = () => {
-      sound.playButtonClick();
-      this.modalHowItWorks.show();
-    };
+    const btnMenuHow = document.getElementById('btn-menu-how');
+    if (btnMenuHow) {
+      btnMenuHow.onclick = () => {
+        sound.playButtonClick();
+        this.modalHowItWorks.show();
+      };
+    }
 
     const btnMenuSettings = document.getElementById('btn-menu-settings');
     if (btnMenuSettings) {
