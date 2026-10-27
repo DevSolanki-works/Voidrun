@@ -17,6 +17,7 @@ export class Rocket {
     this.maxSpeed = 5.2;
     this.thrustPower = 0.42;
     this.friction = 0.93; // Velocity damping per tick
+    this.controlMode = 'ai'; // 'human' or 'ai'
 
     this.heading = -Math.PI / 2; // Default facing UP
     this.targetHeading = -Math.PI / 2;
@@ -53,6 +54,7 @@ export class Rocket {
     this.alive = true;
     this.throttle.set(0, 0);
     this.prevThrottle.set(0, 0);
+    this.setControlMode(this.controlMode);
 
     this.metrics = {
       ticksAlive: 0,
@@ -62,6 +64,36 @@ export class Rocket {
       jitterScore: 0,
       distanceTraveled: 0
     };
+  }
+
+  /**
+   * Sets control mode: 'human' provides high-acceleration, agile arcade physics,
+   * while 'ai' preserves the exact dynamics used for neural network training.
+   */
+  setControlMode(mode = 'human') {
+    this.controlMode = mode;
+    if (mode === 'human') {
+      this.thrustPower = 0.95;
+      this.maxSpeed = 6.8;
+      this.friction = 0.94;
+    } else {
+      this.thrustPower = 0.42;
+      this.maxSpeed = 5.2;
+      this.friction = 0.93;
+    }
+  }
+
+  /**
+   * Applies an instantaneous velocity impulse (e.g. from a punchy keypress or D-pad tap)
+   */
+  applyImpulse(ix, iy) {
+    if (!this.alive) return;
+    this.vel.x += ix;
+    this.vel.y += iy;
+    this.vel.clampMag(this.maxSpeed);
+    if (this.vel.magSq() > 0.1) {
+      this.targetHeading = this.vel.heading();
+    }
   }
 
   /**

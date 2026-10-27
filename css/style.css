@@ -318,23 +318,29 @@ body {
 }
 
 .thrust-pip {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #475569;
-  width: 17px;
-  height: 17px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #64748b;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: all 0.05s ease-out;
   user-select: none;
+  cursor: pointer;
+}
+
+.thrust-pip:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .thrust-pip.active {
   color: #000000;
-  background: #ffffff;
-  box-shadow: 0 0 8px #ffffff;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
   transform: scale(1.15);
 }
 
@@ -421,34 +427,37 @@ body {
   width: 58px;
   height: 52px;
   border-radius: 10px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: rgba(30, 41, 59, 0.9);
+  border: 2px solid rgba(255, 255, 255, 0.45);
   color: #ffffff;
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: transform 0.06s ease-out, background 0.06s ease-out, border-color 0.06s ease-out;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.05s ease-out, background 0.05s ease-out, border-color 0.05s ease-out, box-shadow 0.05s ease-out;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  user-select: none;
 }
 
 .dpad-btn:hover {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(51, 65, 85, 0.98);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  transform: translateY(-1px);
 }
 
 .dpad-btn:active,
 .dpad-btn.active {
-  background: rgba(255, 255, 255, 0.28);
+  background: #38bdf8;
   border-color: #ffffff;
-  color: #ffffff;
-  transform: scale(0.93);
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.45), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #000000;
+  transform: scale(0.92);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.8), inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .dpad-center-hub {

@@ -21,10 +21,12 @@ export class GameSimulation {
     this.difficulty = options.difficulty || 'standard';
     this.adaptiveMode = options.adaptiveMode || 'gentle';
     this.headless = options.headless === true;
+    this.controlMode = options.controlMode || 'ai';
 
     this.prng = new PRNG(this.seed);
     this.arena = new Arena(this.width, this.height);
     this.rocket = new Rocket(this.arena.centerX, this.arena.centerY, this.maxShields);
+    this.rocket.setControlMode(this.controlMode);
     this.spawner = new Spawner(this.arena, this.prng);
     this.spawner.setDifficulty(this.difficulty);
     this.director = new AdaptiveDirector(this.arena, this.prng);
@@ -57,14 +59,16 @@ export class GameSimulation {
     if (this.director) this.director.setMode(mode);
   }
 
-  reset(seed = this.seed, maxShields = this.maxShields, isUntrainedDemo = this.isUntrainedDemo) {
+  reset(seed = this.seed, maxShields = this.maxShields, isUntrainedDemo = this.isUntrainedDemo, controlMode = this.controlMode) {
     this.seed = seed;
     this.maxShields = maxShields;
     this.isUntrainedDemo = isUntrainedDemo;
+    this.controlMode = controlMode;
     this.cornerCampTicks = 0;
     this.prng.reset(this.seed);
 
     this.rocket.reset(this.arena.centerX, this.arena.centerY, this.maxShields);
+    this.rocket.setControlMode(this.controlMode);
     this.spawner.reset(this.isUntrainedDemo);
     this.spawner.setDifficulty(this.difficulty);
     this.director.reset();

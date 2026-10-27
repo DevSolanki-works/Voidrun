@@ -58,6 +58,24 @@ class App {
       left: false,
       right: false
     };
+    this.thrustTimers = {
+      up: 0,
+      down: 0,
+      left: 0,
+      right: 0
+    };
+    this.isKeyHeld = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+    this.isDpadHeld = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
     this.pointerTarget = null;
     this.pointerActive = false;
     this.challengePointerTarget = null;
@@ -529,68 +547,60 @@ class App {
     };
   }
 
+  triggerDirection(dir, isInitialPress = true) {
+    if (!['up', 'down', 'left', 'right'].includes(dir)) return;
+    this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 18);
+    this.keys[dir] = true;
+
+    if (isInitialPress) {
+      const activeSim = (this.currentScreen === 'challenge') ? this.challengeHumanSim : this.sim;
+      if (activeSim && activeSim.rocket && activeSim.rocket.alive && !activeSim.gameOver) {
+        const impulse = 3.6;
+        if (dir === 'up') activeSim.rocket.applyImpulse(0, -impulse);
+        if (dir === 'down') activeSim.rocket.applyImpulse(0, impulse);
+        if (dir === 'left') activeSim.rocket.applyImpulse(-impulse, 0);
+        if (dir === 'right') activeSim.rocket.applyImpulse(impulse, 0);
+      }
+      sound.playThrust();
+    }
+
+    this.pointerTarget = null;
+    this.challengePointerTarget = null;
+  }
+
   bindInputs() {
-    // Multi-key tracking set that normalizes event.code, event.key, and legacy keyCode
     this.activeKeyCodes = new Set();
 
-    const isDirectionActive = (dir) => {
-      if (dir === 'up') {
-        return (
-          this.activeKeyCodes.has('arrowup') ||
-          this.activeKeyCodes.has('keyw') ||
-          this.activeKeyCodes.has('w') ||
-          this.activeKeyCodes.has('z') ||
-          this.activeKeyCodes.has('numpad8') ||
-          this.activeKeyCodes.has('38') ||
-          this.activeKeyCodes.has('87')
-        );
-      }
-      if (dir === 'down') {
-        return (
-          this.activeKeyCodes.has('arrowdown') ||
-          this.activeKeyCodes.has('keys') ||
-          this.activeKeyCodes.has('s') ||
-          this.activeKeyCodes.has('numpad2') ||
-          this.activeKeyCodes.has('40') ||
-          this.activeKeyCodes.has('83')
-        );
-      }
-      if (dir === 'left') {
-        return (
-          this.activeKeyCodes.has('arrowleft') ||
-          this.activeKeyCodes.has('keya') ||
-          this.activeKeyCodes.has('a') ||
-          this.activeKeyCodes.has('q') ||
-          this.activeKeyCodes.has('numpad4') ||
-          this.activeKeyCodes.has('37') ||
-          this.activeKeyCodes.has('65')
-        );
-      }
-      if (dir === 'right') {
-        return (
-          this.activeKeyCodes.has('arrowright') ||
-          this.activeKeyCodes.has('keyd') ||
-          this.activeKeyCodes.has('d') ||
-          this.activeKeyCodes.has('numpad6') ||
-          this.activeKeyCodes.has('39') ||
-          this.activeKeyCodes.has('68')
-        );
-      }
-      return false;
-    };
+    const getDirectionFromEvent = (e) => {
+      const code = (e.code || '').toLowerCase();
+      const key = (e.key || '').toLowerCase();
+      const legacyCode = String(e.keyCode || e.which || '');
 
-    const syncKeys = () => {
-      this.keys.up = isDirectionActive('up');
-      this.keys.down = isDirectionActive('down');
-      this.keys.left = isDirectionActive('left');
-      this.keys.right = isDirectionActive('right');
+      if (
+        code === 'arrowup' || key === 'arrowup' || key === 'up' ||
+        code === 'keyw' || key === 'w' || key === 'z' ||
+        code === 'numpad8' || legacyCode === '38' || legacyCode === '87'
+      ) return 'up';
 
-      if (this.keys.up || this.keys.down || this.keys.left || this.keys.right) {
-        this.pointerActive = false;
-        this.pointerTarget = null;
-        this.challengePointerActive = false;
-        this.challengePointerTarget = null;
-      }
+      if (
+        code === 'arrowdown' || key === 'arrowdown' || key === 'down' ||
+        code === 'keys' || key === 's' ||
+        code === 'numpad2' || legacyCode === '40' || legacyCode === '83'
+      ) return 'down';
+
+      if (
+        code === 'arrowleft' || key === 'arrowleft' || key === 'left' ||
+        code === 'keya' || key === 'a' || key === 'q' ||
+        code === 'numpad4' || legacyCode === '37' || legacyCode === '65'
+      ) return 'left';
+
+      if (
+        code === 'arrowright' || key === 'arrowright' || key === 'right' ||
+        code === 'keyd' || key === 'd' ||
+        code === 'numpad6' || legacyCode === '39' || legacyCode === '68'
+      ) return 'right';
+
+      return null;
     };
 
     const handleKeyDown = (e) => {
@@ -600,15 +610,20 @@ class App {
 
       const code = (e.code || '').toLowerCase();
       const key = (e.key || '').toLowerCase();
-      const legacyCode = String(e.keyCode || e.which || '');
 
-      if (code) this.activeKeyCodes.add(code);
-      if (key) this.activeKeyCodes.add(key);
-      if (legacyCode) this.activeKeyCodes.add(legacyCode);
+      const dir = getDirectionFromEvent(e);
+      if (dir) {
+        e.preventDefault();
+        if (!this.isKeyHeld[dir]) {
+          this.isKeyHeld[dir] = true;
+          this.triggerDirection(dir, true);
+        } else {
+          this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 18);
+        }
+        return;
+      }
 
-      syncKeys();
-
-      if (this.keys.up || this.keys.down || this.keys.left || this.keys.right || code === 'space' || key === ' ') {
+      if (code === 'space' || key === ' ') {
         e.preventDefault();
       }
 
@@ -628,15 +643,10 @@ class App {
     };
 
     const handleKeyUp = (e) => {
-      const code = (e.code || '').toLowerCase();
-      const key = (e.key || '').toLowerCase();
-      const legacyCode = String(e.keyCode || e.which || '');
-
-      if (code) this.activeKeyCodes.delete(code);
-      if (key) this.activeKeyCodes.delete(key);
-      if (legacyCode) this.activeKeyCodes.delete(legacyCode);
-
-      syncKeys();
+      const dir = getDirectionFromEvent(e);
+      if (dir) {
+        this.isKeyHeld[dir] = false;
+      }
     };
 
     // Attach to window, document, and canvas for multi-layer redundancy
@@ -647,6 +657,10 @@ class App {
     window.addEventListener('keyup', handleKeyUp, true);
     document.addEventListener('keyup', handleKeyUp, true);
     this.canvas.addEventListener('keyup', handleKeyUp, true);
+
+    // Direct fallback window handler properties to guarantee execution on all laptop browsers
+    window.onkeydown = (e) => handleKeyDown(e);
+    window.onkeyup = (e) => handleKeyUp(e);
 
     // Only clear on actual tab visibility hide, NEVER on transient window blur
     document.addEventListener('visibilitychange', () => {
@@ -671,9 +685,9 @@ class App {
       };
     };
 
-    // Point-and-hold steering doubles as a mouse and touch control scheme.
+    // Point-and-hold / click waypoint steering doubles as mouse and touch control scheme.
     this.canvas.tabIndex = 0;
-    this.canvas.setAttribute('aria-label', 'Game arena. Use WASD, arrow keys, touch d-pad, or drag to steer.');
+    this.canvas.setAttribute('aria-label', 'Game arena. Use WASD, arrow keys, touch d-pad, or click/drag to steer.');
 
     const onPointerDown = (e) => {
       if (this.currentScreen !== 'game' || this.gameMode !== 'human') return;
@@ -700,19 +714,17 @@ class App {
         }
       } catch (err) {}
       this.pointerActive = false;
-      this.pointerTarget = null;
+      // Retain this.pointerTarget so single clicks act as waypoints towards destination!
     };
 
     this.canvas.addEventListener('pointerdown', onPointerDown);
     this.canvas.addEventListener('pointermove', onPointerMove);
     this.canvas.addEventListener('pointerup', onPointerUp);
     this.canvas.addEventListener('pointercancel', onPointerUp);
-    this.canvas.addEventListener('lostpointercapture', () => {
-      this.pointerActive = false;
-      this.pointerTarget = null;
-    });
+    this.canvas.addEventListener('mousedown', onPointerDown);
+    this.canvas.addEventListener('mousemove', onPointerMove);
+    this.canvas.addEventListener('mouseup', onPointerUp);
 
-    // Global release listeners on window so pointer release is NEVER lost
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerUp);
     window.addEventListener('mouseup', onPointerUp);
@@ -746,7 +758,6 @@ class App {
           }
         } catch (err) {}
         this.challengePointerActive = false;
-        this.challengePointerTarget = null;
       };
       chalCanvas.addEventListener('pointerup', onChalPointerUp);
       chalCanvas.addEventListener('pointercancel', onChalPointerUp);
@@ -760,33 +771,61 @@ class App {
       if (!dir) return;
 
       const press = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.keys[dir] = true;
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        this.isDpadHeld[dir] = true;
         btn.classList.add('active');
-        this.pointerActive = false;
-        this.pointerTarget = null;
-        this.challengePointerActive = false;
-        this.challengePointerTarget = null;
-        sound.playThrust();
+        this.triggerDirection(dir, true);
       };
 
       const release = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.keys[dir] = false;
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        this.isDpadHeld[dir] = false;
         btn.classList.remove('active');
       };
 
       btn.addEventListener('pointerdown', press);
+      btn.addEventListener('touchstart', press, { passive: false });
+      btn.addEventListener('mousedown', press);
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.triggerDirection(dir, true);
+      });
+
       btn.addEventListener('pointerup', release);
       btn.addEventListener('pointercancel', release);
-      btn.addEventListener('pointerleave', release);
-
-      btn.addEventListener('touchstart', press, { passive: false });
       btn.addEventListener('touchend', release, { passive: false });
       btn.addEventListener('touchcancel', release, { passive: false });
+      btn.addEventListener('mouseup', release);
     });
+
+    // Make HUD Thrust Indicators Interactive as well
+    const indMap = { 'ind-up': 'up', 'ind-down': 'down', 'ind-left': 'left', 'ind-right': 'right' };
+    for (const [id, dir] of Object.entries(indMap)) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.cursor = 'pointer';
+        el.setAttribute('role', 'button');
+        el.setAttribute('tabindex', '-1');
+        el.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          this.isDpadHeld[dir] = true;
+          this.triggerDirection(dir, true);
+        });
+        el.addEventListener('pointerup', () => {
+          this.isDpadHeld[dir] = false;
+        });
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.triggerDirection(dir, true);
+        });
+      }
+    }
   }
 
   updateThrustHUD(tx, ty) {
@@ -811,10 +850,10 @@ class App {
 
   clearMovementKeys() {
     if (this.activeKeyCodes) this.activeKeyCodes.clear();
-    this.keys.up = false;
-    this.keys.down = false;
-    this.keys.left = false;
-    this.keys.right = false;
+    this.keys = { up: false, down: false, left: false, right: false };
+    this.thrustTimers = { up: 0, down: 0, left: 0, right: 0 };
+    this.isKeyHeld = { up: false, down: false, left: false, right: false };
+    this.isDpadHeld = { up: false, down: false, left: false, right: false };
     this.pointerActive = false;
     this.pointerTarget = null;
     this.challengePointerActive = false;
@@ -904,7 +943,7 @@ class App {
     if (insightPanel) insightPanel.style.display = 'none';
 
     // 3 Shields for rich arcade playability
-    this.sim.reset(Date.now() % 100000, 3, false);
+    this.sim.reset(Date.now() % 100000, 3, false, 'human');
     this.showScreen('game');
   }
 
@@ -1010,7 +1049,7 @@ class App {
     // 1 Shield for untrained AI demo; 3 Shields for trained AI
     const isUntrained = (phase === 'untrained-demo');
     const shields = isUntrained ? 1 : 3;
-    this.sim.reset(Date.now() % 100000, shields, isUntrained);
+    this.sim.reset(Date.now() % 100000, shields, isUntrained, 'ai');
     this.showScreen('game');
   }
 
@@ -1042,7 +1081,8 @@ class App {
       seed: matchSeed,
       maxShields: 3,
       difficulty: this.settings.difficulty,
-      adaptiveMode: this.settings.adaptiveArena
+      adaptiveMode: this.settings.adaptiveArena,
+      controlMode: 'human'
     });
 
     this.challengeAISim = new GameSimulation({
@@ -1051,7 +1091,8 @@ class App {
       seed: matchSeed,
       maxShields: 3,
       difficulty: this.settings.difficulty,
-      adaptiveMode: this.settings.adaptiveArena
+      adaptiveMode: this.settings.adaptiveArena,
+      controlMode: 'ai'
     });
 
     // Sound hooks
@@ -1099,6 +1140,18 @@ class App {
 
     // 1. Step Human Simulation
     if (!this.challengeHumanSim.gameOver) {
+      for (const dir of ['up', 'down', 'left', 'right']) {
+        if (this.isKeyHeld[dir] || this.isDpadHeld[dir]) {
+          this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 10);
+        }
+        if (this.thrustTimers[dir] > 0) {
+          this.thrustTimers[dir]--;
+          this.keys[dir] = true;
+        } else {
+          this.keys[dir] = false;
+        }
+      }
+
       let tx = 0;
       let ty = 0;
       if (this.keys.left) tx -= 1;
@@ -1107,13 +1160,15 @@ class App {
       if (this.keys.down) ty += 1;
 
       // Pointer / touch drag steering in challenge mode
-      if (tx === 0 && ty === 0 && this.challengePointerActive && this.challengePointerTarget) {
+      if (tx === 0 && ty === 0 && this.challengePointerTarget) {
         const dx = this.challengePointerTarget.x - this.challengeHumanSim.rocket.pos.x;
         const dy = this.challengePointerTarget.y - this.challengeHumanSim.rocket.pos.y;
         const distance = Math.hypot(dx, dy);
-        if (distance > 12) {
+        if (distance > 14) {
           tx = Math.max(-1, Math.min(1, dx / distance));
           ty = Math.max(-1, Math.min(1, dy / distance));
+        } else {
+          this.challengePointerTarget = null;
         }
       }
 
@@ -1296,6 +1351,19 @@ class App {
 
     if (!this.isPaused && !this.sim.gameOver) {
       if (this.gameMode === 'human') {
+        // Step thrust timers and resolve direction keys
+        for (const dir of ['up', 'down', 'left', 'right']) {
+          if (this.isKeyHeld[dir] || this.isDpadHeld[dir]) {
+            this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 10);
+          }
+          if (this.thrustTimers[dir] > 0) {
+            this.thrustTimers[dir]--;
+            this.keys[dir] = true;
+          } else {
+            this.keys[dir] = false;
+          }
+        }
+
         // Compute human throttle from arrow/WASD keys
         let tx = 0;
         let ty = 0;
@@ -1304,14 +1372,16 @@ class App {
         if (this.keys.up) ty -= 1;
         if (this.keys.down) ty += 1;
 
-        // Pointer / touch drag steering applies ONLY when actively held AND no keyboard direction is pressed
-        if (tx === 0 && ty === 0 && this.pointerActive && this.pointerTarget) {
+        // Pointer / touch drag & waypoint steering
+        if (tx === 0 && ty === 0 && this.pointerTarget) {
           const dx = this.pointerTarget.x - this.sim.rocket.pos.x;
           const dy = this.pointerTarget.y - this.sim.rocket.pos.y;
           const distance = Math.hypot(dx, dy);
-          if (distance > 12) {
+          if (distance > 14) {
             tx = Math.max(-1, Math.min(1, dx / distance));
             ty = Math.max(-1, Math.min(1, dy / distance));
+          } else {
+            this.pointerTarget = null;
           }
         }
 
