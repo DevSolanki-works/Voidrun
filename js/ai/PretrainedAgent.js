@@ -9,6 +9,7 @@ import { CHECKPOINTS } from './PretrainedCheckpoints.js';
 export const PRETRAINED_GENOME_100 = CHECKPOINTS.gen100.weights;
 export const PRETRAINED_GENOME_500 = CHECKPOINTS.gen500.weights;
 export const PRETRAINED_GENOME_1000 = CHECKPOINTS.gen1000.weights;
+export const PRETRAINED_GENOME_10000 = CHECKPOINTS.gen10000.weights;
 
 export { CHECKPOINTS };
 

@@ -66,7 +66,7 @@
       <div class="menu-checkpoints-card">
         <div class="checkpoints-header">
           <span class="checkpoints-kicker">PRE-TRAINED NEUROEVOLUTION CHECKPOINTS</span>
-          <p class="checkpoints-desc">Load and observe models evolved at generations 100, 500, and 1000.</p>
+          <p class="checkpoints-desc">Load and observe models evolved at generations 100, 500, 1000, and 10,000.</p>
         </div>
         <div class="checkpoints-grid">
           <div class="checkpoint-card" data-gen="100">
@@ -111,6 +111,21 @@
             </div>
             <div class="chk-actions">
               <button class="btn-chk-watch" data-gen="1000" style="width: 100%;">Watch AI Pilot</button>
+            </div>
+          </div>
+
+          <div class="checkpoint-card card-10k" data-gen="10000">
+            <div class="chk-top">
+              <span class="chk-badge badge-10k">GEN 10,000</span>
+              <span class="chk-label">Singularity Master</span>
+            </div>
+            <div class="chk-desc">Hyper-evolved policy: predictive micro-dodging &amp; multi-threat centroid evasion.</div>
+            <div class="chk-stat-row">
+              <span>Best Survival: <strong id="chk-survival-10000">165.8s</strong></span>
+              <span>Fitness: <strong id="chk-fitness-10000">34,500</strong></span>
+            </div>
+            <div class="chk-actions">
+              <button class="btn-chk-watch" data-gen="10000" style="width: 100%;">Watch AI Pilot</button>
             </div>
           </div>
         </div>
@@ -318,6 +333,10 @@
           <button type="button" class="lab-chk-btn highlight" data-gen="1000">
             <strong>Gen 1000</strong>
             <span>Apex (120.6s)</span>
+          </button>
+          <button type="button" class="lab-chk-btn highlight-10k" data-gen="10000">
+            <strong>Gen 10k</strong>
+            <span>Singularity (165s+)</span>
           </button>
         </div>
       </section>
@@ -933,7 +952,7 @@
 
           <div class="simple-card">
             <h4>🧬 How Evolution Trains It</h4>
-            <p>At Generation 0, weights are randomized, so the AI crashes in ~3 seconds. The Genetic Algorithm tests 36 pilots, saves the ones that survived longest, combines their brains (crossover), adds small mutations (new instincts), and repeats. By Gen 500–1000, it masters high-speed evasion!</p>
+            <p>At Generation 0, weights are randomized, so the AI crashes in ~3 seconds. The Genetic Algorithm tests 36 pilots, saves the ones that survived longest, combines their brains (crossover), adds small mutations (new instincts), and repeats. By Gen 500–1000, it masters high-speed evasion, and by Gen 10,000, it achieves singularity-level predictive dodges!</p>
           </div>
         </div>
       </div>

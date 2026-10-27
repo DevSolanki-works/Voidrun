@@ -1053,6 +1053,18 @@ body {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.checkpoint-card.card-10k {
+  border-color: rgba(168, 85, 247, 0.45);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(56, 189, 248, 0.06));
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.15);
+}
+
+.checkpoint-card.card-10k:hover {
+  border-color: rgba(168, 85, 247, 0.8);
+  box-shadow: 0 6px 28px rgba(168, 85, 247, 0.3);
+  transform: translateY(-2px);
+}
+
 .chk-top {
   display: flex;
   justify-content: space-between;
@@ -1074,6 +1086,13 @@ body {
   background: #ffffff;
   color: #000000;
   border-color: #ffffff;
+}
+
+.chk-badge.badge-10k {
+  background: linear-gradient(135deg, #a855f7, #38bdf8);
+  color: #000000;
+  border-color: #c084fc;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
 }
 
 .chk-label {

@@ -476,6 +476,16 @@ input[type="range"] {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.lab-chk-btn.highlight-10k {
+  border-color: rgba(168, 85, 247, 0.6);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(56, 189, 248, 0.1));
+}
+
+.lab-chk-btn.highlight-10k:hover {
+  border-color: #c084fc;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.35);
+}
+
 .lab-chk-btn strong {
   font-family: var(--font-mono);
   font-size: 0.92rem;

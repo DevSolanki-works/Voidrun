@@ -386,13 +386,15 @@ class App {
           const descMap = {
             '100': 'Novice Evasion • Baseline Obstacle Clearance & Wall Awareness',
             '500': 'Advanced Pilot • Active Multi-Threat Evasion & Tactical Centering',
-            '1000': 'Apex Master • High-Speed Trajectory Anticipation & Evasion'
+            '1000': 'Apex Master • High-Speed Trajectory Anticipation & Evasion',
+            '10000': 'Singularity Master • Multi-Threat Centroid Predictive Evasion'
           };
+          const formattedGen = gen === '10000' ? 'GEN 10,000' : `GEN ${gen}`;
           this.startWatchBestMode(
             new Float32Array(chk.weights),
-            `AI PILOT (GEN ${gen})`,
+            `AI PILOT (${formattedGen})`,
             'trained-demo',
-            `GEN ${gen}`,
+            formattedGen,
             descMap[gen] || `Pre-trained Generation ${gen} Model`
           );
         }

@@ -51,7 +51,7 @@ export class HUD {
           const clean = String(aiGen).trim();
           genStr = clean.toUpperCase().includes('GEN') ? clean.toUpperCase() : `GEN ${clean}`;
         } else if (extraInfo) {
-          const match = String(extraInfo).match(/GEN\s*\d+/i);
+          const match = String(extraInfo).match(/GEN\s*[\d,]+/i);
           if (match) {
             genStr = match[0].toUpperCase();
           } else {
