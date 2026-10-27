@@ -143,11 +143,6 @@ class App {
       waveDisplay: document.getElementById('hud-wave'),
       shieldsContainer: document.getElementById('hud-shields'),
       modeBadge: document.getElementById('hud-mode-badge'),
-      aiGenItem: document.getElementById('hud-ai-gen-item'),
-      aiGenValue: document.getElementById('hud-ai-gen-value'),
-      aiBanner: document.getElementById('hud-ai-banner'),
-      aiBannerGen: document.getElementById('hud-ai-banner-gen'),
-      aiBannerDesc: document.getElementById('hud-ai-banner-desc'),
       directorBanner: document.getElementById('hud-director-banner'),
       gameOverModal: document.getElementById('modal-gameover'),
       pauseModal: document.getElementById('modal-pause'),
@@ -970,13 +965,9 @@ class App {
     this.sim.setDifficulty(this.settings.difficulty);
     this.sim.setAdaptiveMode(this.settings.adaptiveArena);
 
-    // Hide AI insight panel & AI banner in human pilot mode
+    // Hide AI insight panel in human pilot mode
     const insightPanel = document.getElementById('ai-insight-panel');
     if (insightPanel) insightPanel.style.display = 'none';
-    const aiBanner = document.getElementById('hud-ai-banner');
-    if (aiBanner) aiBanner.style.display = 'none';
-    const aiGenItem = document.getElementById('hud-ai-gen-item');
-    if (aiGenItem) aiGenItem.style.display = 'none';
 
     // 3 Shields for rich arcade playability
     this.sim.reset(Date.now() % 100000, 3, false, 'human');

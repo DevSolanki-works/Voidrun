@@ -14,9 +14,9 @@ export class Rocket {
     this.acc = new Vector(0, 0);
 
     this.radius = 12; // Hitbox radius
-    this.maxSpeed = 5.2;
-    this.thrustPower = 0.42;
-    this.friction = 0.93; // Velocity damping per tick
+    this.maxSpeed = 3.2;
+    this.thrustPower = 0.25;
+    this.friction = 0.92; // Velocity damping per tick
     this.controlMode = 'ai'; // 'human' or 'ai'
 
     this.heading = -Math.PI / 2; // Default facing UP
@@ -77,9 +77,9 @@ export class Rocket {
       this.maxSpeed = 5.2;
       this.friction = 0.93;
     } else {
-      this.thrustPower = 0.42;
-      this.maxSpeed = 5.2;
-      this.friction = 0.93;
+      this.thrustPower = 0.25;
+      this.maxSpeed = 3.2;
+      this.friction = 0.92;
     }
   }
 

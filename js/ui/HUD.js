@@ -40,34 +40,35 @@ export class HUD {
       this.el.shieldsContainer.innerHTML = html;
     }
 
-    // Mode badge & AI generation displays
+    // Mode badge & AI generation displays (single prominent display of current generation)
     if (this.el.modeBadge) {
       if (mode === 'human') {
-        this.el.modeBadge.textContent = 'YOU (MANUAL)';
+        this.el.modeBadge.textContent = 'YOU';
         this.el.modeBadge.className = 'hud-badge badge-human';
       } else if (mode === 'ai-watch') {
-        this.el.modeBadge.textContent = aiGen ? `AI (${aiGen})` : (extraInfo || 'AI PILOT');
+        let genStr = 'GEN 1000';
+        if (aiGen) {
+          const clean = String(aiGen).trim();
+          genStr = clean.toUpperCase().includes('GEN') ? clean.toUpperCase() : `GEN ${clean}`;
+        } else if (extraInfo) {
+          const match = String(extraInfo).match(/GEN\s*\d+/i);
+          if (match) {
+            genStr = match[0].toUpperCase();
+          } else {
+            genStr = extraInfo;
+          }
+        }
+        this.el.modeBadge.textContent = `AI PILOT • ${genStr}`;
         this.el.modeBadge.className = 'hud-badge badge-ai';
       }
     }
 
-    // AI Generation telemetry item
+    // Safely hide legacy generation elements if present in DOM
     if (this.el.aiGenItem) {
-      this.el.aiGenItem.style.display = mode === 'ai-watch' ? 'flex' : 'none';
-      if (this.el.aiGenValue) {
-        this.el.aiGenValue.textContent = aiGen || extraInfo || 'GEN 1000';
-      }
+      this.el.aiGenItem.style.display = 'none';
     }
-
-    // Prominent AI flight banner under HUD topbar
     if (this.el.aiBanner) {
-      this.el.aiBanner.style.display = mode === 'ai-watch' ? 'flex' : 'none';
-      if (this.el.aiBannerGen) {
-        this.el.aiBannerGen.textContent = aiGen || extraInfo || 'GENERATION 1000';
-      }
-      if (this.el.aiBannerDesc && aiDesc) {
-        this.el.aiBannerDesc.textContent = aiDesc;
-      }
+      this.el.aiBanner.style.display = 'none';
     }
 
     // Adaptive Director Status Indicator

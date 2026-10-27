@@ -132,18 +132,14 @@
     <div class="game-wrapper">
       <!-- Top HUD Bar -->
       <header class="hud-topbar">
-        <div class="hud-group">
-          <span id="hud-mode-badge" class="hud-badge badge-human">You</span>
-          <div id="hud-ai-gen-item" class="telemetry-item telemetry-ai-gen" style="display: none;">
-            <span class="telemetry-label">AI GENERATION</span>
-            <span id="hud-ai-gen-value" class="telemetry-value text-cyan">GEN 1000</span>
-          </div>
+        <div class="hud-group hud-left">
+          <span id="hud-mode-badge" class="hud-badge badge-human">YOU</span>
           <div class="telemetry-item">
             <span class="telemetry-label">Time</span>
             <span id="hud-time" class="telemetry-value">00:00.00</span>
           </div>
           <div class="telemetry-item">
-            <span class="telemetry-label">SCORE</span>
+            <span class="telemetry-label">Score</span>
             <span id="hud-score" class="telemetry-value">0</span>
           </div>
           <div class="telemetry-item">
@@ -151,28 +147,18 @@
             <span id="hud-wave" class="telemetry-value">WAVE 1</span>
           </div>
           <div id="hud-record-goal" class="telemetry-item" style="display: none;">
-            <span id="hud-record-label" class="telemetry-label">Your best to beat</span>
-            <span id="hud-record-time" class="telemetry-value">Set a record!</span>
+            <span id="hud-record-label" class="telemetry-label">TARGET</span>
+            <span id="hud-record-time" class="telemetry-value">--:--</span>
           </div>
         </div>
 
-        <div class="hud-group">
-          <div class="telemetry-item">
+        <div class="hud-group hud-right">
+          <div class="telemetry-item hud-shields-item">
             <span class="telemetry-label">SHIELDS</span>
             <div id="hud-shields" class="shields-box">
               <span class="shield-pip active"></span>
               <span class="shield-pip active"></span>
               <span class="shield-pip active"></span>
-            </div>
-          </div>
-
-          <div class="telemetry-item">
-            <span class="telemetry-label">THRUST</span>
-            <div id="hud-thrust-indicators" class="thrust-indicators">
-              <span id="ind-up" class="thrust-pip" title="Thrust Up (W / ▲)">▲</span>
-              <span id="ind-left" class="thrust-pip" title="Thrust Left (A / ◀)">◀</span>
-              <span id="ind-down" class="thrust-pip" title="Thrust Down (S / ▼)">▼</span>
-              <span id="ind-right" class="thrust-pip" title="Thrust Right (D / ▶)">▶</span>
             </div>
           </div>
 
@@ -183,15 +169,6 @@
           <button id="btn-hud-exit" class="hud-btn" title="Return to menu">Menu</button>
         </div>
       </header>
-
-      <!-- Prominent AI Generation Banner (visible when watching AI pilot) -->
-      <div id="hud-ai-banner" class="hud-ai-banner" style="display: none;">
-        <div class="ai-banner-left">
-          <span class="ai-banner-tag">🤖 AUTONOMOUS PILOT</span>
-          <span id="hud-ai-banner-gen" class="ai-banner-gen">GENERATION 1000</span>
-        </div>
-        <div id="hud-ai-banner-desc" class="ai-banner-desc">Evolved Genetic Algorithm Controller • 20 Sensory Inputs → 16 Hidden → 4 Actions</div>
-      </div>
 
       <!-- Adaptive Director Warning Ticker -->
       <div id="hud-director-banner" class="hud-director-banner" style="display: none;"></div>
@@ -434,19 +411,6 @@
               <span class="elim-title">ELIMINATED</span>
               <span id="elim-human-time" class="elim-stat">Survived: 0.0s</span>
               <button id="btn-chal-skip-results" class="hud-btn" style="margin-top: 10px; font-size: 0.75rem;">End Match & Compare</button>
-            </div>
-          </div>
-          <div id="chal-mobile-controls" class="mobile-controls-pad" style="margin: 8px auto 0;">
-            <div class="dpad-row">
-              <button type="button" class="dpad-btn dpad-up" data-dir="up" aria-label="Thrust Up">▲</button>
-            </div>
-            <div class="dpad-row dpad-mid-row">
-              <button type="button" class="dpad-btn dpad-left" data-dir="left" aria-label="Thrust Left">◀</button>
-              <div class="dpad-center-hub">YOU</div>
-              <button type="button" class="dpad-btn dpad-right" data-dir="right" aria-label="Thrust Right">▶</button>
-            </div>
-            <div class="dpad-row">
-              <button type="button" class="dpad-btn dpad-down" data-dir="down" aria-label="Thrust Down">▼</button>
             </div>
           </div>
         </div>
