@@ -134,6 +134,10 @@
       <header class="hud-topbar">
         <div class="hud-group">
           <span id="hud-mode-badge" class="hud-badge badge-human">You</span>
+          <div id="hud-ai-gen-item" class="telemetry-item telemetry-ai-gen" style="display: none;">
+            <span class="telemetry-label">AI GENERATION</span>
+            <span id="hud-ai-gen-value" class="telemetry-value text-cyan">GEN 1000</span>
+          </div>
           <div class="telemetry-item">
             <span class="telemetry-label">Time</span>
             <span id="hud-time" class="telemetry-value">00:00.00</span>
@@ -179,6 +183,15 @@
           <button id="btn-hud-exit" class="hud-btn" title="Return to menu">Menu</button>
         </div>
       </header>
+
+      <!-- Prominent AI Generation Banner (visible when watching AI pilot) -->
+      <div id="hud-ai-banner" class="hud-ai-banner" style="display: none;">
+        <div class="ai-banner-left">
+          <span class="ai-banner-tag">🤖 AUTONOMOUS PILOT</span>
+          <span id="hud-ai-banner-gen" class="ai-banner-gen">GENERATION 1000</span>
+        </div>
+        <div id="hud-ai-banner-desc" class="ai-banner-desc">Evolved Genetic Algorithm Controller • 20 Sensory Inputs → 16 Hidden → 4 Actions</div>
+      </div>
 
       <!-- Adaptive Director Warning Ticker -->
       <div id="hud-director-banner" class="hud-director-banner" style="display: none;"></div>
@@ -1051,6 +1064,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js?v=20261027_0500"></script>
+  <script type="module" src="js/main.js?v=20261027_0600"></script>
 </body>
 </html>

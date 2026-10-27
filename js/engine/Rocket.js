@@ -73,9 +73,9 @@ export class Rocket {
   setControlMode(mode = 'human') {
     this.controlMode = mode;
     if (mode === 'human') {
-      this.thrustPower = 0.95;
-      this.maxSpeed = 6.8;
-      this.friction = 0.94;
+      this.thrustPower = 0.58;
+      this.maxSpeed = 5.2;
+      this.friction = 0.93;
     } else {
       this.thrustPower = 0.42;
       this.maxSpeed = 5.2;

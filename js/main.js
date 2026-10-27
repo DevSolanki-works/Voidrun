@@ -22,6 +22,8 @@ class App {
     this.currentScreen = 'menu'; // 'menu', 'game', 'lab'
     this.gameMode = 'human';     // 'human' or 'ai-watch'
     this.aiPolicyLabel = 'MANUAL PILOT';
+    this.aiGenerationTag = '';
+    this.aiBannerDesc = '';
     this.sessionPhase = 'intro';
     this.aiGenerationsAtDemo = 0;
 
@@ -141,6 +143,11 @@ class App {
       waveDisplay: document.getElementById('hud-wave'),
       shieldsContainer: document.getElementById('hud-shields'),
       modeBadge: document.getElementById('hud-mode-badge'),
+      aiGenItem: document.getElementById('hud-ai-gen-item'),
+      aiGenValue: document.getElementById('hud-ai-gen-value'),
+      aiBanner: document.getElementById('hud-ai-banner'),
+      aiBannerGen: document.getElementById('hud-ai-banner-gen'),
+      aiBannerDesc: document.getElementById('hud-ai-banner-desc'),
       directorBanner: document.getElementById('hud-director-banner'),
       gameOverModal: document.getElementById('modal-gameover'),
       pauseModal: document.getElementById('modal-pause'),
@@ -381,7 +388,18 @@ class App {
         const gen = btn.dataset.gen;
         const chk = CHECKPOINTS[`gen${gen}`];
         if (chk) {
-          this.startWatchBestMode(new Float32Array(chk.weights), `GEN ${gen} CHECKPOINT`);
+          const descMap = {
+            '100': 'Novice Evasion • Baseline Obstacle Clearance & Wall Awareness',
+            '500': 'Advanced Pilot • Active Multi-Threat Evasion & Tactical Centering',
+            '1000': 'Apex Master • High-Speed Trajectory Anticipation & Evasion'
+          };
+          this.startWatchBestMode(
+            new Float32Array(chk.weights),
+            `AI PILOT (GEN ${gen})`,
+            'trained-demo',
+            `GEN ${gen}`,
+            descMap[gen] || `Pre-trained Generation ${gen} Model`
+          );
         }
       };
     });
@@ -561,13 +579,13 @@ class App {
 
   triggerDirection(dir, isInitialPress = true) {
     if (!['up', 'down', 'left', 'right'].includes(dir)) return;
-    this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 18);
+    this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 10);
     this.keys[dir] = true;
 
     if (isInitialPress) {
       const activeSim = (this.currentScreen === 'challenge') ? this.challengeHumanSim : this.sim;
       if (activeSim && activeSim.rocket && activeSim.rocket.alive && !activeSim.gameOver) {
-        const impulse = 3.6;
+        const impulse = 1.4;
         if (dir === 'up') activeSim.rocket.applyImpulse(0, -impulse);
         if (dir === 'down') activeSim.rocket.applyImpulse(0, impulse);
         if (dir === 'left') activeSim.rocket.applyImpulse(-impulse, 0);
@@ -630,7 +648,7 @@ class App {
           this.isKeyHeld[dir] = true;
           this.triggerDirection(dir, true);
         } else {
-          this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 18);
+          this.thrustTimers[dir] = Math.max(this.thrustTimers[dir] || 0, 10);
         }
         return;
       }
@@ -934,6 +952,8 @@ class App {
     this.ga.targetSurvivalTicks = Math.round(Storage.loadHighScore().survivalTime * 60);
     this.gameMode = 'human';
     this.aiPolicyLabel = 'MANUAL PILOT';
+    this.aiGenerationTag = '';
+    this.aiBannerDesc = '';
     const viewModeButton = document.getElementById('btn-hud-viewmode');
     if (viewModeButton) viewModeButton.style.display = 'none';
     const recordGoal = document.getElementById('hud-record-goal');
@@ -950,9 +970,13 @@ class App {
     this.sim.setDifficulty(this.settings.difficulty);
     this.sim.setAdaptiveMode(this.settings.adaptiveArena);
 
-    // Hide AI insight panel in human pilot mode
+    // Hide AI insight panel & AI banner in human pilot mode
     const insightPanel = document.getElementById('ai-insight-panel');
     if (insightPanel) insightPanel.style.display = 'none';
+    const aiBanner = document.getElementById('hud-ai-banner');
+    if (aiBanner) aiBanner.style.display = 'none';
+    const aiGenItem = document.getElementById('hud-ai-gen-item');
+    if (aiGenItem) aiGenItem.style.display = 'none';
 
     // 3 Shields for rich arcade playability
     this.sim.reset(Date.now() % 100000, 3, false, 'human');
@@ -962,24 +986,36 @@ class App {
   startWatchBestDefault() {
     let genome = this.ga.bestGenome;
     let label = `EVOLVED AGENT (GEN ${this.ga.generation})`;
+    let genTag = `GEN ${this.ga.generation}`;
+    let desc = `Locally Evolved Policy • Generation ${this.ga.generation} Neural Network`;
 
     if (!genome) {
       const saved = Storage.loadBestAgent();
       if (saved) {
         genome = new Float32Array(saved.genome);
         label = `SAVED AGENT (GEN ${saved.generation})`;
+        genTag = `GEN ${saved.generation}`;
+        desc = `Saved Local Checkpoint • Generation ${saved.generation} Model`;
       } else {
         genome = new Float32Array(PRETRAINED_GENOME);
-        label = `PRE-TRAINED BENCHMARK AGENT`;
+        label = `GEN 1000 APEX MODEL`;
+        genTag = `GEN 1000 (APEX)`;
+        desc = `Apex Master Neuroevolution Checkpoint • 120s+ High-Speed Evasion`;
       }
     }
 
-    this.startWatchBestMode(genome, label, 'trained-demo');
+    this.startWatchBestMode(genome, label, 'trained-demo', genTag, desc);
   }
 
   startUntrainedAIDemo() {
     const firstPilot = this.ga.population[0];
-    this.startWatchBestMode(firstPilot.network.getWeights(), 'Untrained pilot', 'untrained-demo');
+    this.startWatchBestMode(
+      firstPilot.network.getWeights(),
+      'Untrained pilot',
+      'untrained-demo',
+      'GEN 0 (UNTRAINED)',
+      'Baseline Pilot • Untrained Random Weights (Demonstrating Rapid Elimination)'
+    );
   }
 
   startTrainedAIDemo() {
@@ -991,7 +1027,13 @@ class App {
       return;
     }
     this.aiGenerationsAtDemo = this.ga.generation;
-    this.startWatchBestMode(genome, 'Trained pilot', 'trained-demo');
+    this.startWatchBestMode(
+      genome,
+      `Trained pilot (Gen ${this.aiGenerationsAtDemo})`,
+      'trained-demo',
+      `GEN ${this.aiGenerationsAtDemo}`,
+      `Evolved Pilot • Trained Across ${this.aiGenerationsAtDemo} Generations to Beat Human Record`
+    );
   }
 
   showTrainingComplete() {
@@ -1009,10 +1051,12 @@ class App {
     this.showScreen('menu');
   }
 
-  startWatchBestMode(genome, label, phase = 'trained-demo') {
+  startWatchBestMode(genome, label, phase = 'trained-demo', genTag = '', desc = '') {
     this.gameMode = 'ai-watch';
     this.aiPolicyLabel = label;
     this.sessionPhase = phase;
+    this.aiGenerationTag = genTag || (label.includes('GEN') ? label : 'GEN 1000');
+    this.aiBannerDesc = desc || 'Autonomous Neural Network Policy (20 Sensory Inputs → 16 Hidden → 4 Outputs)';
     const viewModeButton = document.getElementById('btn-hud-viewmode');
     if (viewModeButton) viewModeButton.style.display = 'inline-flex';
     const recordGoal = document.getElementById('hud-record-goal');
@@ -1408,6 +1452,9 @@ class App {
         this.sim.step(this.watchController);
         if (this.sim.rocket) {
           this.updateThrustHUD(this.sim.rocket.throttle.x, this.sim.rocket.throttle.y);
+          if (this.sim.rocket.throttle.magSq() > 0.05) {
+            sound.playThrust();
+          }
         }
       }
 
@@ -1474,7 +1521,7 @@ class App {
     this.renderer.render(this.sim, sensorData);
 
     // Update HUD
-    this.hud.update(this.sim, this.gameMode, this.aiPolicyLabel);
+    this.hud.update(this.sim, this.gameMode, this.aiPolicyLabel, this.aiGenerationTag, this.aiBannerDesc);
 
     // Update AI Insight Telemetry Panel
     if (this.gameMode === 'ai-watch') {

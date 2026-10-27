@@ -11,7 +11,7 @@ export class HUD {
     this.el = domElements;
   }
 
-  update(simulation, mode = 'human', extraInfo = '') {
+  update(simulation, mode = 'human', extraInfo = '', aiGen = '', aiDesc = '') {
     // Format survival timer MM:SS.SS
     const totalSeconds = simulation.ticks / 60;
     const mins = Math.floor(totalSeconds / 60);
@@ -40,14 +40,33 @@ export class HUD {
       this.el.shieldsContainer.innerHTML = html;
     }
 
-    // Mode badge
+    // Mode badge & AI generation displays
     if (this.el.modeBadge) {
       if (mode === 'human') {
-        this.el.modeBadge.textContent = 'You';
+        this.el.modeBadge.textContent = 'YOU (MANUAL)';
         this.el.modeBadge.className = 'hud-badge badge-human';
       } else if (mode === 'ai-watch') {
-        this.el.modeBadge.textContent = extraInfo || 'AI pilot';
+        this.el.modeBadge.textContent = aiGen ? `AI (${aiGen})` : (extraInfo || 'AI PILOT');
         this.el.modeBadge.className = 'hud-badge badge-ai';
+      }
+    }
+
+    // AI Generation telemetry item
+    if (this.el.aiGenItem) {
+      this.el.aiGenItem.style.display = mode === 'ai-watch' ? 'flex' : 'none';
+      if (this.el.aiGenValue) {
+        this.el.aiGenValue.textContent = aiGen || extraInfo || 'GEN 1000';
+      }
+    }
+
+    // Prominent AI flight banner under HUD topbar
+    if (this.el.aiBanner) {
+      this.el.aiBanner.style.display = mode === 'ai-watch' ? 'flex' : 'none';
+      if (this.el.aiBannerGen) {
+        this.el.aiBannerGen.textContent = aiGen || extraInfo || 'GENERATION 1000';
+      }
+      if (this.el.aiBannerDesc && aiDesc) {
+        this.el.aiBannerDesc.textContent = aiDesc;
       }
     }
 

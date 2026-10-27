@@ -74,39 +74,55 @@ class SoundSystem {
 
     try {
       const now = this.ctx.currentTime;
-      // updateGame() runs every animation frame. Rate-limit the engine pulse so
-      // held thrust sounds continuous without allocating dozens of nodes/second.
-      if (now - this.lastThrustAt < 0.12) return;
+      // Rate-limit the engine pulse so held thrust sounds continuous and clean
+      if (now - this.lastThrustAt < 0.10) return;
       this.lastThrustAt = now;
 
+      // 1. Warm engine core rumble (audible on laptop speakers)
       const osc = this.ctx.createOscillator();
-      const overtone = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      const overtoneGain = this.ctx.createGain();
-
+      const oscGain = this.ctx.createGain();
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(58, now);
-      osc.frequency.exponentialRampToValueAtTime(92, now + 0.12);
-      overtone.type = 'sawtooth';
-      overtone.frequency.setValueAtTime(132, now);
-      overtone.frequency.exponentialRampToValueAtTime(178, now + 0.12);
+      osc.frequency.setValueAtTime(115, now);
+      osc.frequency.exponentialRampToValueAtTime(175, now + 0.12);
 
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(0.026, now + 0.018);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
-      overtoneGain.gain.setValueAtTime(0.0001, now);
-      overtoneGain.gain.linearRampToValueAtTime(0.006, now + 0.02);
-      overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+      oscGain.gain.setValueAtTime(0.001, now);
+      oscGain.gain.linearRampToValueAtTime(0.12, now + 0.02);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
 
-      osc.connect(gain);
-      overtone.connect(overtoneGain);
-      gain.connect(this.getDestination());
-      overtoneGain.connect(this.getDestination());
-
+      osc.connect(oscGain);
+      oscGain.connect(this.getDestination());
       osc.start(now);
-      overtone.start(now);
-      osc.stop(now + 0.16);
-      overtone.stop(now + 0.16);
+      osc.stop(now + 0.15);
+
+      // 2. Propellant rush (filtered noise hiss)
+      if (!this.noiseBuffer) {
+        const bufferSize = Math.floor(this.ctx.sampleRate * 0.2);
+        this.noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = this.noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = Math.random() * 2 - 1;
+        }
+      }
+
+      const noiseSource = this.ctx.createBufferSource();
+      noiseSource.buffer = this.noiseBuffer;
+
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(520, now);
+      filter.Q.setValueAtTime(1.5, now);
+
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.001, now);
+      noiseGain.gain.linearRampToValueAtTime(0.08, now + 0.02);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+      noiseSource.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(this.getDestination());
+
+      noiseSource.start(now);
+      noiseSource.stop(now + 0.14);
     } catch (e) {}
   }
 
