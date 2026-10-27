@@ -530,80 +530,125 @@ class App {
   }
 
   bindInputs() {
-    const controlForEvent = (e) => {
-      const code = e.code || '';
-      const key = (e.key || '').toLowerCase();
-      const legacyCode = e.keyCode || e.which;
-      if (
-        code === 'ArrowUp' || code === 'KeyW' ||
-        key === 'arrowup' || key === 'w' || key === 'z' ||
-        legacyCode === 38 || legacyCode === 87
-      ) return 'up';
-      if (
-        code === 'ArrowDown' || code === 'KeyS' ||
-        key === 'arrowdown' || key === 's' ||
-        legacyCode === 40 || legacyCode === 83
-      ) return 'down';
-      if (
-        code === 'ArrowLeft' || code === 'KeyA' ||
-        key === 'arrowleft' || key === 'a' || key === 'q' ||
-        legacyCode === 37 || legacyCode === 65
-      ) return 'left';
-      if (
-        code === 'ArrowRight' || code === 'KeyD' ||
-        key === 'arrowright' || key === 'd' ||
-        legacyCode === 39 || legacyCode === 68
-      ) return 'right';
-      return null;
+    // Multi-key tracking set that normalizes event.code, event.key, and legacy keyCode
+    this.activeKeyCodes = new Set();
+
+    const isDirectionActive = (dir) => {
+      if (dir === 'up') {
+        return (
+          this.activeKeyCodes.has('arrowup') ||
+          this.activeKeyCodes.has('keyw') ||
+          this.activeKeyCodes.has('w') ||
+          this.activeKeyCodes.has('z') ||
+          this.activeKeyCodes.has('numpad8') ||
+          this.activeKeyCodes.has('38') ||
+          this.activeKeyCodes.has('87')
+        );
+      }
+      if (dir === 'down') {
+        return (
+          this.activeKeyCodes.has('arrowdown') ||
+          this.activeKeyCodes.has('keys') ||
+          this.activeKeyCodes.has('s') ||
+          this.activeKeyCodes.has('numpad2') ||
+          this.activeKeyCodes.has('40') ||
+          this.activeKeyCodes.has('83')
+        );
+      }
+      if (dir === 'left') {
+        return (
+          this.activeKeyCodes.has('arrowleft') ||
+          this.activeKeyCodes.has('keya') ||
+          this.activeKeyCodes.has('a') ||
+          this.activeKeyCodes.has('q') ||
+          this.activeKeyCodes.has('numpad4') ||
+          this.activeKeyCodes.has('37') ||
+          this.activeKeyCodes.has('65')
+        );
+      }
+      if (dir === 'right') {
+        return (
+          this.activeKeyCodes.has('arrowright') ||
+          this.activeKeyCodes.has('keyd') ||
+          this.activeKeyCodes.has('d') ||
+          this.activeKeyCodes.has('numpad6') ||
+          this.activeKeyCodes.has('39') ||
+          this.activeKeyCodes.has('68')
+        );
+      }
+      return false;
     };
 
-    // Capture at document level so focused buttons and browser layout differences
-    // cannot swallow movement input while the game is active.
-    document.addEventListener('keydown', (e) => {
-      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) {
-        return;
-      }
+    const syncKeys = () => {
+      this.keys.up = isDirectionActive('up');
+      this.keys.down = isDirectionActive('down');
+      this.keys.left = isDirectionActive('left');
+      this.keys.right = isDirectionActive('right');
 
-      const direction = controlForEvent(e);
-      const key = (e.key || '').toLowerCase();
-
-      if (direction) {
-        e.preventDefault();
-        this.keys[direction] = true;
-        // Keyboard takes priority over any active pointer dragging
+      if (this.keys.up || this.keys.down || this.keys.left || this.keys.right) {
         this.pointerActive = false;
         this.pointerTarget = null;
         this.challengePointerActive = false;
         this.challengePointerTarget = null;
-      } else if (e.code === 'Space' || e.key === ' ') {
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) {
+        return;
+      }
+
+      const code = (e.code || '').toLowerCase();
+      const key = (e.key || '').toLowerCase();
+      const legacyCode = String(e.keyCode || e.which || '');
+
+      if (code) this.activeKeyCodes.add(code);
+      if (key) this.activeKeyCodes.add(key);
+      if (legacyCode) this.activeKeyCodes.add(legacyCode);
+
+      syncKeys();
+
+      if (this.keys.up || this.keys.down || this.keys.left || this.keys.right || code === 'space' || key === ' ') {
         e.preventDefault();
       }
 
-      if (!e.repeat && ((e.code || '').toLowerCase() === 'keyp' || key === 'p' || e.key === 'Escape')) {
-        if (this.currentScreen === 'game') {
-          this.togglePause();
-        }
+      if (!e.repeat && (code === 'keyp' || key === 'p' || key === 'escape')) {
+        if (this.currentScreen === 'game') this.togglePause();
       }
 
-      if (!e.repeat && ((e.code || '').toLowerCase() === 'keym' || key === 'm')) {
+      if (!e.repeat && (code === 'keym' || key === 'm')) {
         const btnMute = document.getElementById('btn-hud-mute');
         if (btnMute) btnMute.click();
       }
 
-      if (!e.repeat && ((e.code || '').toLowerCase() === 'keyv' || key === 'v')) {
+      if (!e.repeat && (code === 'keyv' || key === 'v')) {
         const btnViewMode = document.getElementById('btn-hud-viewmode');
         if (btnViewMode) btnViewMode.click();
       }
-    }, true);
+    };
 
-    document.addEventListener('keyup', (e) => {
-      const direction = controlForEvent(e);
-      if (direction) {
-        this.keys[direction] = false;
-      }
-    }, true);
+    const handleKeyUp = (e) => {
+      const code = (e.code || '').toLowerCase();
+      const key = (e.key || '').toLowerCase();
+      const legacyCode = String(e.keyCode || e.which || '');
 
-    window.addEventListener('blur', () => this.clearMovementKeys());
+      if (code) this.activeKeyCodes.delete(code);
+      if (key) this.activeKeyCodes.delete(key);
+      if (legacyCode) this.activeKeyCodes.delete(legacyCode);
+
+      syncKeys();
+    };
+
+    // Attach to window, document, and canvas for multi-layer redundancy
+    window.addEventListener('keydown', handleKeyDown, true);
+    document.addEventListener('keydown', handleKeyDown, true);
+    this.canvas.addEventListener('keydown', handleKeyDown, true);
+
+    window.addEventListener('keyup', handleKeyUp, true);
+    document.addEventListener('keyup', handleKeyUp, true);
+    this.canvas.addEventListener('keyup', handleKeyUp, true);
+
+    // Only clear on actual tab visibility hide, NEVER on transient window blur
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) this.clearMovementKeys();
     });
@@ -744,6 +789,17 @@ class App {
     });
   }
 
+  updateThrustHUD(tx, ty) {
+    const indUp = document.getElementById('ind-up');
+    const indDown = document.getElementById('ind-down');
+    const indLeft = document.getElementById('ind-left');
+    const indRight = document.getElementById('ind-right');
+    if (indUp) indUp.classList.toggle('active', ty < -0.05);
+    if (indDown) indDown.classList.toggle('active', ty > 0.05);
+    if (indLeft) indLeft.classList.toggle('active', tx < -0.05);
+    if (indRight) indRight.classList.toggle('active', tx > 0.05);
+  }
+
   updatePointerTarget(e) {
     const rect = this.canvas.getBoundingClientRect();
     if (!rect || rect.width <= 0 || rect.height <= 0) return;
@@ -754,6 +810,7 @@ class App {
   }
 
   clearMovementKeys() {
+    if (this.activeKeyCodes) this.activeKeyCodes.clear();
     this.keys.up = false;
     this.keys.down = false;
     this.keys.left = false;
@@ -763,6 +820,7 @@ class App {
     this.challengePointerActive = false;
     this.challengePointerTarget = null;
     document.querySelectorAll('.dpad-btn.active').forEach((b) => b.classList.remove('active'));
+    this.updateThrustHUD(0, 0);
   }
 
   updateTitleBadges() {
@@ -1263,8 +1321,12 @@ class App {
 
         this.sim.rocket.setThrottle(tx, ty);
         this.sim.step(null);
+        this.updateThrustHUD(tx, ty);
       } else if (this.gameMode === 'ai-watch') {
         this.sim.step(this.watchController);
+        if (this.sim.rocket) {
+          this.updateThrustHUD(this.sim.rocket.throttle.x, this.sim.rocket.throttle.y);
+        }
       }
 
       // Check for Game Over condition

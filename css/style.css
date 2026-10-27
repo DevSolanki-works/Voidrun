@@ -307,6 +307,37 @@ body {
   border-color: rgba(255, 255, 255, 0.15);
 }
 
+.thrust-indicators {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.thrust-pip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #475569;
+  width: 17px;
+  height: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all 0.05s ease-out;
+  user-select: none;
+}
+
+.thrust-pip.active {
+  color: #000000;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff;
+  transform: scale(1.15);
+}
+
 .hud-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);

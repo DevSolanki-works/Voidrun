@@ -1,0 +1,4 @@
+# VOIDRUN: Evasion Protocol — Multi-Threat Evasion using Genetic Algorithms
+# The core simulation and neuroevolution algorithm run on Python standard library
+# Optional high-performance acceleration:
+numpy>=1.22.0
