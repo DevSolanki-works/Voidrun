@@ -527,39 +527,54 @@ class App {
 
   bindInputs() {
     window.addEventListener('keydown', (e) => {
-      // Avoid scrolling on arrow keys or space
-      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+      // Use physical key codes so controls behave consistently across keyboard layouts.
+      const movementKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyA', 'KeyS', 'KeyD'];
+      if (movementKeys.includes(e.code) || e.code === 'Space') {
         e.preventDefault();
       }
 
-      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') this.keys.up = true;
-      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') this.keys.down = true;
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') this.keys.left = true;
-      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this.keys.right = true;
+      if (movementKeys.includes(e.code)) {
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') this.keys.up = true;
+        if (e.code === 'ArrowDown' || e.code === 'KeyS') this.keys.down = true;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = true;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = true;
+      }
 
-      if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+      if (!e.repeat && (e.code === 'KeyP' || e.code === 'Escape')) {
         if (this.currentScreen === 'game') {
           this.togglePause();
         }
       }
 
-      if (e.key === 'm' || e.key === 'M') {
+      if (!e.repeat && e.code === 'KeyM') {
         const btnMute = document.getElementById('btn-hud-mute');
         if (btnMute) btnMute.click();
       }
 
-      if (e.key === 'v' || e.key === 'V') {
+      if (!e.repeat && e.code === 'KeyV') {
         const btnViewMode = document.getElementById('btn-hud-viewmode');
         if (btnViewMode) btnViewMode.click();
       }
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') this.keys.up = false;
-      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') this.keys.down = false;
-      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') this.keys.left = false;
-      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') this.keys.right = false;
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') this.keys.up = false;
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') this.keys.down = false;
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
     });
+
+    window.addEventListener('blur', () => this.clearMovementKeys());
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.clearMovementKeys();
+    });
+  }
+
+  clearMovementKeys() {
+    this.keys.up = false;
+    this.keys.down = false;
+    this.keys.left = false;
+    this.keys.right = false;
   }
 
   updateTitleBadges() {
@@ -610,6 +625,7 @@ class App {
   }
 
   startHumanGame() {
+    this.clearMovementKeys();
     this.sessionPhase = 'human';
     this.ga.reset();
     this.ga.targetSurvivalTicks = Math.round(Storage.loadHighScore().survivalTime * 60);

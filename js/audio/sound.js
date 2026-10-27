@@ -12,6 +12,7 @@ class SoundSystem {
     this.isMuted = localStorage.getItem('voidrun_muted') === 'true';
     this.volume = parseFloat(localStorage.getItem('voidrun_volume') || '0.7');
     this.initialized = false;
+    this.lastThrustAt = -Infinity;
   }
 
   init() {
@@ -73,21 +74,39 @@ class SoundSystem {
 
     try {
       const now = this.ctx.currentTime;
+      // updateGame() runs every animation frame. Rate-limit the engine pulse so
+      // held thrust sounds continuous without allocating dozens of nodes/second.
+      if (now - this.lastThrustAt < 0.12) return;
+      this.lastThrustAt = now;
+
       const osc = this.ctx.createOscillator();
+      const overtone = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
+      const overtoneGain = this.ctx.createGain();
 
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(65, now);
-      osc.frequency.exponentialRampToValueAtTime(110, now + 0.08);
+      osc.frequency.setValueAtTime(58, now);
+      osc.frequency.exponentialRampToValueAtTime(92, now + 0.12);
+      overtone.type = 'sawtooth';
+      overtone.frequency.setValueAtTime(132, now);
+      overtone.frequency.exponentialRampToValueAtTime(178, now + 0.12);
 
-      gain.gain.setValueAtTime(0.04, now);
-      gain.gain.linearRampToValueAtTime(0.001, now + 0.09);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(0.026, now + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+      overtoneGain.gain.setValueAtTime(0.0001, now);
+      overtoneGain.gain.linearRampToValueAtTime(0.006, now + 0.02);
+      overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
 
       osc.connect(gain);
+      overtone.connect(overtoneGain);
       gain.connect(this.getDestination());
+      overtoneGain.connect(this.getDestination());
 
       osc.start(now);
-      osc.stop(now + 0.09);
+      overtone.start(now);
+      osc.stop(now + 0.16);
+      overtone.stop(now + 0.16);
     } catch (e) {}
   }
 
