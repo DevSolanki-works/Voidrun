@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VOIDRUN: Evasion Protocol — Multi-Threat Evasion using Genetic Algorithms</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/lab.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,15 90,85 50,70 10,85' fill='%23ffffff'/></svg>" />
+</head>
+<body>
+
+  <!-- ======================================================================
+       SCREEN 1: MAIN TITLE & MENU
+       ====================================================================== -->
+  <section id="screen-menu" class="app-screen active">
+    <div class="menu-container">
+      <div class="logo-tagline">A short interactive experiment</div>
+      <h1 class="game-title">VOIDRUN</h1>
+      <p class="title-subtext">Can a computer learn to dodge better than you?</p>
+
+      <div class="project-intro">
+        <p>This Introduction to Machine Learning project asks whether a <strong>Genetic Algorithm (GA)</strong> can evolve a rocket controller that dodges better. It selects successful pilots, combines their neural-network controls, and mutates them across generations.</p>
+        <p>You’ll fly first, meet a brand-new pilot, then help it learn and see if it can beat your best run.</p>
+        <div class="journey-steps" aria-label="What happens next">
+          <span><b>1</b> You play</span><span><b>2</b> Meet the AI</span><span><b>3</b> Help it learn</span><span><b>4</b> See if it beats you</span>
+        </div>
+        <p class="control-note">Move with WASD or arrow keys. Avoid the meteors and survive as long as you can.</p>
+      </div>
+
+      <div class="badge-row">
+        <span id="menu-status-badge" class="status-badge badge-ready">Ready when you are</span>
+      </div>
+
+      <div class="menu-actions">
+        <button id="btn-menu-play" class="menu-btn btn-primary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start: Play the game
+        </button>
+
+        <button id="btn-menu-challenge" class="menu-btn btn-challenge">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5"/><path d="M13 19l6-6"/><path d="M16 16l4 4"/><path d="M19 21l2-2"/></svg>
+          ⚔️ Human vs AI Challenge
+        </button>
+
+        <button id="btn-menu-lab" class="menu-btn btn-secondary">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          See the AI learn
+        </button>
+
+        <button id="btn-menu-watch" class="menu-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+          Watch the AI play
+        </button>
+
+        <button id="btn-menu-how" class="menu-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          How this project works
+        </button>
+
+        <button id="btn-menu-settings" class="menu-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </button>
+      </div>
+
+      <!-- Pre-trained Evolved Checkpoints Showcase -->
+      <div class="menu-checkpoints-card">
+        <div class="checkpoints-header">
+          <span class="checkpoints-kicker">PRE-TRAINED NEUROEVOLUTION CHECKPOINTS</span>
+          <p class="checkpoints-desc">Load and observe models evolved at generations 100, 500, and 1000.</p>
+        </div>
+        <div class="checkpoints-grid">
+          <div class="checkpoint-card" data-gen="100">
+            <div class="chk-top">
+              <span class="chk-badge">GEN 100</span>
+              <span class="chk-label">Novice Evasion</span>
+            </div>
+            <div class="chk-desc">Learns baseline obstacle clearance and boundary awareness.</div>
+            <div class="chk-stat-row">
+              <span>Best Survival: <strong>71.0s</strong></span>
+              <span>Fitness: <strong>8,002</strong></span>
+            </div>
+            <div class="chk-actions">
+              <button class="btn-chk-watch" data-gen="100">Watch AI</button>
+              <button class="btn-chk-challenge" data-gen="100">Challenge</button>
+            </div>
+          </div>
+
+          <div class="checkpoint-card" data-gen="500">
+            <div class="chk-top">
+              <span class="chk-badge">GEN 500</span>
+              <span class="chk-label">Advanced Pilot</span>
+            </div>
+            <div class="chk-desc">Active multi-threat dodging, tactical centering, and wave scaling.</div>
+            <div class="chk-stat-row">
+              <span>Best Survival: <strong>136.3s</strong></span>
+              <span>Fitness: <strong>17,564</strong></span>
+            </div>
+            <div class="chk-actions">
+              <button class="btn-chk-watch" data-gen="500">Watch AI</button>
+              <button class="btn-chk-challenge" data-gen="500">Challenge</button>
+            </div>
+          </div>
+
+          <div class="checkpoint-card card-apex" data-gen="1000">
+            <div class="chk-top">
+              <span class="chk-badge badge-apex">GEN 1000</span>
+              <span class="chk-label">Apex Master</span>
+            </div>
+            <div class="chk-desc">Evolved policy: high-speed trajectory evasion and predictive dodging.</div>
+            <div class="chk-stat-row">
+              <span>Best Survival: <strong>136.3s</strong></span>
+              <span>Fitness: <strong>17,564</strong></span>
+            </div>
+            <div class="chk-actions">
+              <button class="btn-chk-watch" data-gen="1000">Watch AI</button>
+              <button class="btn-chk-challenge" data-gen="1000">Challenge</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-instructions">
+        <span>Move with <span class="key-tag">W</span><span class="key-tag">A</span><span class="key-tag">S</span><span class="key-tag">D</span> or arrow keys</span>
+        <span><span class="key-tag">P</span> Pause</span>
+        <span><span class="key-tag">M</span> Sound</span>
+        <span><span class="key-tag">V</span> AI view (while watching)</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SCREEN 2: GAMEPLAY ARENA & HUD
+       ====================================================================== -->
+  <section id="screen-game" class="app-screen">
+    <div class="game-wrapper">
+      <!-- Top HUD Bar -->
+      <header class="hud-topbar">
+        <div class="hud-group">
+          <span id="hud-mode-badge" class="hud-badge badge-human">You</span>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Time</span>
+            <span id="hud-time" class="telemetry-value">00:00.00</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">SCORE</span>
+            <span id="hud-score" class="telemetry-value">0</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">Wave</span>
+            <span id="hud-wave" class="telemetry-value">WAVE 1</span>
+          </div>
+          <div id="hud-record-goal" class="telemetry-item" style="display: none;">
+            <span id="hud-record-label" class="telemetry-label">Your best to beat</span>
+            <span id="hud-record-time" class="telemetry-value">Set a record!</span>
+          </div>
+        </div>
+
+        <div class="hud-group">
+          <div class="telemetry-item">
+            <span class="telemetry-label">SHIELDS</span>
+            <div id="hud-shields" class="shields-box">
+              <span class="shield-pip active"></span>
+              <span class="shield-pip active"></span>
+              <span class="shield-pip active"></span>
+            </div>
+          </div>
+
+          <button id="btn-hud-viewmode" class="hud-btn hud-viewmode-btn" title="Explain what the AI sees">Explain AI</button>
+          <button id="btn-hud-settings" class="hud-btn" title="Open Settings">Settings</button>
+          <button id="btn-hud-mute" class="hud-btn" title="Sound (M)">Sound</button>
+          <button id="btn-hud-pause" class="hud-btn" title="Pause (P)">Pause</button>
+          <button id="btn-hud-exit" class="hud-btn" title="Return to menu">Menu</button>
+        </div>
+      </header>
+
+      <!-- Adaptive Director Warning Ticker -->
+      <div id="hud-director-banner" class="hud-director-banner" style="display: none;"></div>
+
+      <!-- Main Canvas Container (800x600 Aspect Ratio) -->
+      <div class="canvas-container">
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+      </div>
+
+      <!-- AI Insight Telemetry & Decision Panel (Visible in AI Insight Mode) -->
+      <div id="ai-insight-panel" class="ai-insight-panel" style="display: none;">
+        <div class="insight-header">
+          <div class="insight-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            What the AI sees
+          </div>
+          <button id="btn-toggle-insight-details" class="btn-sm" style="padding: 4px 10px; font-size: 0.72rem;">Show details</button>
+        </div>
+
+        <div id="insight-details-grid" class="insight-grid" style="display: none;">
+          <!-- Sensory Inputs Column -->
+          <div class="insight-section">
+            <div class="insight-sec-title">Ship and nearby hazards</div>
+            <div class="insight-data-row">
+              <span class="insight-data-label">Rocket Position:</span>
+              <span id="in-pos" class="insight-data-val">(0.00, 0.00)</span>
+            </div>
+            <div class="insight-data-row">
+              <span class="insight-data-label">Rocket Velocity:</span>
+              <span id="in-vel" class="insight-data-val">(0.00, 0.00)</span>
+            </div>
+            <div class="insight-data-row">
+              <span class="insight-data-label">Wall Clearances:</span>
+              <span id="in-walls" class="insight-data-val">L:50% R:50% T:50% B:50%</span>
+            </div>
+            <div class="insight-data-row">
+              <span class="insight-data-label">Primary Hazard:</span>
+              <span id="in-threat" class="insight-data-val">Scanning...</span>
+            </div>
+            <div class="insight-sec-title" style="margin-top: 4px;">Nearby danger in each direction</div>
+            <div id="ai-radar-meters" class="radar-meters-row"></div>
+          </div>
+
+          <!-- Motor Output Column -->
+          <div class="insight-section">
+            <div class="insight-sec-title">How it is steering</div>
+            <div class="motor-bars">
+              <div class="motor-item">
+                <span class="motor-lbl">THRUST LEFT</span>
+                <div class="motor-meter-track"><div id="out-left" class="motor-meter-fill" style="width: 0%;"></div></div>
+              </div>
+              <div class="motor-item">
+                <span class="motor-lbl">THRUST RIGHT</span>
+                <div class="motor-meter-track"><div id="out-right" class="motor-meter-fill" style="width: 0%;"></div></div>
+              </div>
+              <div class="motor-item">
+                <span class="motor-lbl">THRUST UP</span>
+                <div class="motor-meter-track"><div id="out-up" class="motor-meter-fill" style="width: 0%;"></div></div>
+              </div>
+              <div class="motor-item">
+                <span class="motor-lbl">THRUST DOWN</span>
+                <div class="motor-meter-track"><div id="out-down" class="motor-meter-fill" style="width: 0%;"></div></div>
+              </div>
+            </div>
+            <div class="insight-data-row" style="margin-top: 8px;">
+              <span class="insight-data-label">Net Throttle Vector:</span>
+              <span id="out-action" class="insight-data-val" style="color: #ffffff;">Throttle: (0.00, 0.00)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend Row -->
+        <div class="insight-legend">
+          <div class="legend-item"><span class="legend-dot" style="background: rgba(255, 255, 255, 0.5);"></span> 180px Sensory Horizon</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> 8-Ray Radar Contacts</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #ef4444;"></span> Primary Hazard Target</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #ffffff;"></span> Resultant Action Vector (T)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SCREEN 3: EVOLUTION LAB
+       ====================================================================== -->
+  <section id="screen-lab" class="app-screen">
+    <div class="guided-training">
+      <header class="guided-header">
+        <div class="step-kicker">STEP 3 OF 4</div>
+        <h2>Help the pilot learn</h2>
+        <p>It just crashed into its first meteor. Choose how many tries to give it, then let it learn from each run.</p>
+      </header>
+
+      <div class="training-progress-card">
+        <div class="progress-copy"><span id="training-progress-label">Ready to train</span><span id="training-generation-count">0 / 20 generations</span></div>
+        <div class="progress-track"><div id="training-progress-bar"></div></div>
+        <p id="training-status">Each generation tests a group of pilots and keeps the strongest movers.</p>
+        <div class="training-records"><span>Your best <strong id="training-player-best">0.0s</strong></span><span>AI best so far <strong id="training-ai-best">0.0s</strong></span></div>
+      </div>
+
+      <section id="training-chart-panel" class="training-chart-panel" style="display: none;">
+        <div class="training-chart-heading"><h3>Fitness across generations</h3><p>Higher fitness means stronger survival and evasion scores.</p></div>
+        <div class="chart-wrapper"><canvas id="chart-canvas" width="600" height="260"></canvas></div>
+      </section>
+
+      <section class="training-choice-card">
+        <h3>Target Generations to Train</h3>
+        <p>Decide how many generations to evolve the pilot population. You can type any number from 1 to 1000.</p>
+        <div class="custom-gen-input-row">
+          <div class="gen-input-wrapper">
+            <input id="input-target-gens" type="number" min="1" max="1000" step="1" value="25" class="custom-gen-input" />
+            <span class="gen-unit-label">generations</span>
+          </div>
+          <div class="gen-quick-steppers">
+            <button type="button" class="gen-step-btn" data-step="10">+10</button>
+            <button type="button" class="gen-step-btn" data-step="25">+25</button>
+            <button type="button" class="gen-step-btn" data-step="50">+50</button>
+            <button type="button" class="gen-step-btn" data-step="100">+100</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pretrained Checkpoints Selector in Lab -->
+      <section class="training-choice-card">
+        <h3>Load Pre-Trained Model Checkpoint</h3>
+        <p>Or jump straight to an evolved neural network checkpoint:</p>
+        <div class="lab-checkpoints-row">
+          <button type="button" class="lab-chk-btn" data-gen="100">
+            <strong>Gen 100</strong>
+            <span>Novice (71.0s)</span>
+          </button>
+          <button type="button" class="lab-chk-btn" data-gen="500">
+            <strong>Gen 500</strong>
+            <span>Advanced (136.3s)</span>
+          </button>
+          <button type="button" class="lab-chk-btn highlight" data-gen="1000">
+            <strong>Gen 1000</strong>
+            <span>Apex (136.3s)</span>
+          </button>
+        </div>
+      </section>
+
+      <details class="training-options">
+        <summary>Adjust how it learns</summary>
+        <div class="training-option">
+          <label for="slider-mutation"><span>Mutation rate · chance of trying a new move</span><output id="val-mutation">8%</output></label>
+          <input id="slider-mutation" type="range" min="0.01" max="0.30" step="0.01" value="0.08" />
+          <p>Higher means more pilots try changed moves. Lower keeps more of what has worked.</p>
+        </div>
+        <div class="training-option">
+          <label for="slider-elitism"><span>Elitism · keep top pilots unchanged</span><output id="val-elitism">2</output></label>
+          <input id="slider-elitism" type="range" min="1" max="5" step="1" value="2" />
+          <p>These top pilots carry over unchanged, so their good movement is not lost.</p>
+        </div>
+      </details>
+
+      <div class="training-explainer"><strong>How the GA learns</strong><br /><b>Population</b> is the group of pilots tested each generation. Their <b>fitness</b> score rewards survival and dodges. <b>Selection</b> chooses higher-scoring pilots; <b>crossover</b> combines their neural-network weights; <b>mutation</b> makes small changes. More generations can help, but perfect play is not guaranteed.</div>
+
+      <div id="training-finished-panel" class="training-finished-panel" style="display: none;">
+        <div>
+          <span class="finished-kicker">Training complete</span>
+          <h3>Evolution Cycle Finished</h3>
+          <p>Your neural controller has evolved new weights. Challenge it head-to-head or watch it fly solo.</p>
+        </div>
+        <div class="finished-actions-row">
+          <button id="btn-challenge-after-train" class="menu-btn btn-primary">⚔️ Challenge AI Side-by-Side</button>
+          <button id="btn-let-ai-play" class="menu-btn btn-secondary">Watch AI Play Solo</button>
+        </div>
+      </div>
+
+      <div class="guided-actions">
+        <button id="btn-train-toggle" class="menu-btn btn-primary">Start training</button>
+        <button id="btn-exit-session" class="quiet-button">Exit this run</button>
+      </div>
+
+      <span id="metric-gen" hidden>0</span><span id="metric-best-fit" hidden>0</span><span id="metric-avg-fit" hidden>0</span><span id="metric-best-survival" hidden>0</span><span id="metric-player-best" hidden>0</span>
+      <button id="btn-step-gen" hidden>One round</button><button id="btn-reset-train" hidden>Reset</button>
+      <div id="lab-saved-badge" hidden></div><button id="btn-save-best" hidden></button><button id="btn-load-pretrained" hidden></button><button id="btn-watch-best" hidden></button><button id="btn-run-benchmark" hidden></button>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SCREEN 4: SIDE-BY-SIDE HUMAN VS AI CHALLENGE
+       ====================================================================== -->
+  <section id="screen-challenge" class="app-screen">
+    <div class="challenge-screen-wrapper">
+      <header class="challenge-header-bar">
+        <div class="challenge-title-box">
+          <span class="hud-badge badge-challenge">SIMULTANEOUS BENCHMARK</span>
+          <h2>Human vs AI Arena Challenge</h2>
+          <p class="challenge-sub">Both rockets operate in parallel arenas facing the identical procedural hazard seed in real-time.</p>
+        </div>
+        <div class="challenge-top-actions">
+          <button id="btn-challenge-restart" class="hud-btn">Restart Match</button>
+          <button id="btn-challenge-exit" class="hud-btn">Exit to Menu</button>
+        </div>
+      </header>
+
+      <div class="challenge-arenas-grid">
+        <!-- Player Arena -->
+        <div class="challenge-side challenge-side-human">
+          <div class="challenge-side-header">
+            <div class="pilot-identity">
+              <span class="hud-badge badge-human">You (Human Pilot)</span>
+              <span class="control-hint">WASD / Arrow Keys</span>
+            </div>
+            <div class="challenge-telemetry">
+              <div class="chal-tel-box">
+                <span class="chal-label">TIME</span>
+                <span id="chal-human-time" class="chal-val">00:00.00</span>
+              </div>
+              <div class="chal-tel-box">
+                <span class="chal-label">SCORE</span>
+                <span id="chal-human-score" class="chal-val">0</span>
+              </div>
+              <div class="chal-tel-box">
+                <span class="chal-label">SHIELDS</span>
+                <div id="chal-human-shields" class="shields-box">
+                  <span class="shield-pip active"></span>
+                  <span class="shield-pip active"></span>
+                  <span class="shield-pip active"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="canvas-container challenge-canvas-container">
+            <canvas id="canvas-chal-human" width="600" height="480"></canvas>
+            <div id="overlay-human-elim" class="challenge-elim-overlay" style="display: none;">
+              <span class="elim-title">ELIMINATED</span>
+              <span id="elim-human-time" class="elim-stat">Survived: 0.0s</span>
+              <button id="btn-chal-skip-results" class="hud-btn" style="margin-top: 10px; font-size: 0.75rem;">End Match & Compare</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Arena -->
+        <div class="challenge-side challenge-side-ai">
+          <div class="challenge-side-header">
+            <div class="pilot-identity">
+              <span id="chal-ai-badge" class="hud-badge badge-ai">Autonomous GA Pilot</span>
+              <span id="chal-ai-checkpoint-tag" class="control-hint">Gen 1000 Apex Model</span>
+            </div>
+            <div class="challenge-telemetry">
+              <div class="chal-tel-box">
+                <span class="chal-label">TIME</span>
+                <span id="chal-ai-time" class="chal-val">00:00.00</span>
+              </div>
+              <div class="chal-tel-box">
+                <span class="chal-label">SCORE</span>
+                <span id="chal-ai-score" class="chal-val">0</span>
+              </div>
+              <div class="chal-tel-box">
+                <span class="chal-label">SHIELDS</span>
+                <div id="chal-ai-shields" class="shields-box">
+                  <span class="shield-pip active"></span>
+                  <span class="shield-pip active"></span>
+                  <span class="shield-pip active"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="canvas-container challenge-canvas-container">
+            <canvas id="canvas-chal-ai" width="600" height="480"></canvas>
+            <div id="overlay-ai-elim" class="challenge-elim-overlay" style="display: none;">
+              <span class="elim-title">ELIMINATED</span>
+              <span id="elim-ai-time" class="elim-stat">Survived: 0.0s</span>
+              <button id="btn-chal-ai-skip-results" class="hud-btn" style="margin-top: 10px; font-size: 0.75rem;">Finish & View Victory</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live AI Calculation Bar in Challenge Screen -->
+      <div class="challenge-calculation-ticker">
+        <div class="ticker-item"><span class="ticker-lbl">RADAR INSPECTION:</span> <span class="ticker-val">8 Omnidirectional Rays Active (180px Horizon)</span></div>
+        <div class="ticker-item"><span class="ticker-lbl">PRIMARY HAZARD:</span> <span id="chal-ticker-threat" class="ticker-val">Scanning...</span></div>
+        <div class="ticker-item"><span class="ticker-lbl">MOTOR THROTTLE:</span> <span id="chal-ticker-action" class="ticker-val">Throttle: [0.00, 0.00]</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       MODAL: CHALLENGE RESULTS SUMMARY
+       ====================================================================== -->
+  <div id="modal-challenge-results" class="modal-overlay">
+    <div class="modal-card modal-large" style="max-width: 620px;">
+      <div class="modal-header-row" style="margin-bottom: 12px;">
+        <div>
+          <div class="logo-tagline">Head-to-Head Comparison</div>
+          <h2 id="chal-result-title" class="modal-title" style="font-size: 1.6rem;">MATCH COMPLETE</h2>
+        </div>
+      </div>
+      <p id="chal-result-summary" class="modal-subtitle">Direct evaluation on identical hazard seed.</p>
+
+      <div class="challenge-comparison-table-wrapper">
+        <table class="challenge-comparison-table">
+          <thead>
+            <tr>
+              <th>Evaluation Metric</th>
+              <th>Human Pilot</th>
+              <th>AI Controller</th>
+              <th>Outcome</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Survival Time</td>
+              <td id="chal-res-human-time" class="stat-highlight">0.00s</td>
+              <td id="chal-res-ai-time" class="stat-highlight">0.00s</td>
+              <td id="chal-res-time-winner">-</td>
+            </tr>
+            <tr>
+              <td>Score</td>
+              <td id="chal-res-human-score">0</td>
+              <td id="chal-res-ai-score">0</td>
+              <td id="chal-res-score-winner">-</td>
+            </tr>
+            <tr>
+              <td>Near Miss Dodges</td>
+              <td id="chal-res-human-dodges">0</td>
+              <td id="chal-res-ai-dodges">0</td>
+              <td id="chal-res-dodges-winner">-</td>
+            </tr>
+            <tr>
+              <td>Final Standing</td>
+              <td id="chal-res-human-status">-</td>
+              <td id="chal-res-ai-status">-</td>
+              <td id="chal-res-overall-winner" style="font-weight: 700;">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 24px;">
+        <button id="btn-chal-rematch" class="menu-btn btn-primary" style="padding: 12px 24px;">REMATCH</button>
+        <button id="btn-chal-menu" class="btn-sm">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 1: GAME OVER / RUN RESULTS
+       ====================================================================== -->
+  <div id="modal-gameover" class="modal-overlay">
+    <div class="modal-card">
+      <h2 class="modal-title title-danger">RUN TERMINATED</h2>
+      <p id="go-reason" class="modal-subtitle">Destroyed by asteroid hazard</p>
+
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">SURVIVAL TIME</div>
+          <div id="go-time" class="stat-value">0.00s</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">SCORE</div>
+          <div id="go-score" class="stat-value">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">WAVE REACHED</div>
+          <div id="go-wave" class="stat-value">Wave 1</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">NEAR MISS DODGES</div>
+          <div id="go-dodges" class="stat-value">0</div>
+        </div>
+        <div id="go-generations-item" class="stat-item" style="display: none;">
+          <div class="stat-label">GENERATIONS TRAINED</div>
+          <div id="go-generations" class="stat-value">0</div>
+        </div>
+        <div id="go-player-best-item" class="stat-item" style="display: none;">
+          <div class="stat-label">YOUR BEST</div>
+          <div id="go-player-best" class="stat-value">0.0s</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-go-replay" class="menu-btn btn-primary" style="padding: 12px 24px;">RETRY RUN</button>
+        <button id="btn-go-save-agent" class="btn-sm" style="display: none;">SAVE AGENT</button>
+        <button id="btn-go-menu" class="btn-sm">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 2: PAUSE MENU
+       ====================================================================== -->
+  <div id="modal-pause" class="modal-overlay">
+    <div class="modal-card" style="max-width: 380px;">
+      <h2 class="modal-title">PAUSED</h2>
+      <p class="modal-subtitle">Press P or Escape to resume simulation</p>
+      <div class="modal-actions" style="flex-direction: column; width: 100%;">
+        <button id="btn-pause-resume" class="menu-btn btn-primary" style="padding: 12px 24px; width: 100%;">RESUME</button>
+        <button id="btn-pause-settings" class="btn-sm" style="padding: 10px; width: 100%;">⚙ SETTINGS & OPTIONS</button>
+        <button id="btn-pause-quit" class="btn-sm" style="padding: 10px; width: 100%;">Exit this run</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 2B: SETTINGS & PREFERENCES
+       ====================================================================== -->
+  <div id="modal-settings" class="modal-overlay">
+    <div class="modal-card modal-large">
+      <div class="modal-header-row">
+        <div>
+          <div class="logo-tagline">Preferences & Configuration</div>
+          <h2 class="modal-title" style="font-size: 1.5rem;">SYSTEM SETTINGS</h2>
+        </div>
+        <button id="btn-close-settings" class="close-btn">&times;</button>
+      </div>
+
+      <!-- 1. Gameplay & Challenge -->
+      <div class="settings-category">
+        <div class="settings-cat-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+          1. GAMEPLAY & CHALLENGE
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Difficulty</span>
+            <div class="pill-group">
+              <button class="setting-pill" data-setting-group="difficulty" data-setting-value="relaxed">Relaxed</button>
+              <button class="setting-pill active" data-setting-group="difficulty" data-setting-value="standard">Standard</button>
+              <button class="setting-pill" data-setting-group="difficulty" data-setting-value="intense">Intense</button>
+            </div>
+          </div>
+          <p class="setting-desc">Modifies baseline hazard velocity and spawn frequency for manual piloting.</p>
+          <span class="setting-scope">[Applies to Next Run]</span>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Adaptive Arena</span>
+            <div class="pill-group">
+              <button class="setting-pill" data-setting-group="adaptive" data-setting-value="off">Off</button>
+              <button class="setting-pill active" data-setting-group="adaptive" data-setting-value="gentle">Gentle</button>
+              <button class="setting-pill" data-setting-group="adaptive" data-setting-value="strong">Strong</button>
+            </div>
+          </div>
+          <p class="setting-desc">
+            Rule-based dynamic arena director that monitors player habits (edge camping, circular looping, stagnation) and deploys telegraphed hazard waves. Gentle has a 2.8s warning; Strong reacts quicker with a 2.0s warning. (Rule-based game design, not ML).
+          </p>
+          <span class="setting-scope">[Applies to Next Run]</span>
+        </div>
+      </div>
+
+      <!-- 2. Audio & Feedback -->
+      <div class="settings-category">
+        <div class="settings-cat-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          2. AUDIO & VISUAL FEEDBACK
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Procedural Audio</span>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input id="chk-sound-enabled" type="checkbox" checked />
+              <span style="font-size: 0.85rem; font-family: var(--font-mono);">Sound Enabled</span>
+            </label>
+          </div>
+          <span class="setting-scope">[Applies Immediately]</span>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Master Volume</span>
+            <span id="val-volume" class="param-val">70%</span>
+          </div>
+          <input id="slider-volume" type="range" min="0" max="100" step="5" value="70" />
+          <span class="setting-scope">[Applies Immediately]</span>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Screen Shake</span>
+            <div class="pill-group">
+              <button class="setting-pill active" data-setting-group="shake" data-setting-value="on">On</button>
+              <button class="setting-pill" data-setting-group="shake" data-setting-value="reduced">Reduced</button>
+              <button class="setting-pill" data-setting-group="shake" data-setting-value="off">Off</button>
+            </div>
+          </div>
+          <p class="setting-desc">Camera vibration intensity during collisions and near-miss dodges.</p>
+          <span class="setting-scope">[Applies Immediately]</span>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Impact Flash</span>
+            <div class="pill-group">
+              <button class="setting-pill active" data-setting-group="flash" data-setting-value="on">On</button>
+              <button class="setting-pill" data-setting-group="flash" data-setting-value="off">Off</button>
+            </div>
+          </div>
+          <p class="setting-desc">Full-screen chromatic illumination upon hull impacts.</p>
+          <span class="setting-scope">[Applies Immediately]</span>
+        </div>
+      </div>
+
+      <!-- 3. AI Viewing & Training -->
+      <div class="settings-category">
+        <div class="settings-cat-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>
+          3. AI VIEWING & TRAINING
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Default AI Viewing Mode</span>
+            <div class="pill-group">
+              <button class="setting-pill active" data-setting-group="aiview" data-setting-value="game">Game View</button>
+              <button class="setting-pill" data-setting-group="aiview" data-setting-value="insight">AI Insight</button>
+            </div>
+          </div>
+          <p class="setting-desc">
+            Choose the normal game view or turn on extra visuals that explain what the AI is looking at. You can switch views while the AI plays.
+          </p>
+          <span class="setting-scope">[Applies Immediately]</span>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-row-header">
+            <span class="setting-name">Training Speed</span>
+            <div class="pill-group">
+              <button class="setting-pill" data-setting-group="trainspeed" data-setting-value="1x">Watchable</button>
+              <button class="setting-pill" data-setting-group="trainspeed" data-setting-value="5x">Fast</button>
+              <button class="setting-pill active" data-setting-group="trainspeed" data-setting-value="fast">Turbo</button>
+              <button class="setting-pill" data-setting-group="trainspeed" data-setting-value="max">Max</button>
+            </div>
+          </div>
+          <p class="setting-desc">Choose whether to watch each attempt or train more quickly.</p>
+          <span class="setting-scope">[Applies Immediately]</span>
+        </div>
+
+        <!-- Collapsible Advanced AI Section -->
+        <button id="btn-toggle-advanced-settings" class="btn-accordion">▼ EXPAND ADVANCED AI SETTINGS</button>
+        <div id="advanced-settings-panel" style="display: none; flex-direction: column; gap: 14px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(255, 255, 255, 0.1);">
+          <div class="setting-item">
+            <div class="setting-row-header">
+              <span class="setting-name">Pilots in each round</span>
+              <span id="val-setting-pop" class="param-val">36 pilots</span>
+            </div>
+            <input id="slider-setting-pop" type="range" min="20" max="60" step="4" value="36" />
+            <p class="setting-desc">More pilots offer more variety, but take longer to test.</p>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-row-header">
+              <span class="setting-name">Chance of a small change</span>
+              <span id="val-setting-mut" class="param-val">8%</span>
+            </div>
+            <input id="slider-setting-mut" type="range" min="0.01" max="0.30" step="0.01" value="0.08" />
+            <p class="setting-desc">The chance that each part of a pilot changes. Higher values try more variations.</p>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-row-header">
+              <span class="setting-name">Pilots kept each round</span>
+              <span id="val-setting-elite" class="param-val">2 pilots</span>
+            </div>
+            <input id="slider-setting-elite" type="range" min="1" max="5" step="1" value="2" />
+            <p class="setting-desc">Keep the strongest pilots unchanged so their progress carries on.</p>
+          </div>
+
+          <p class="setting-desc" style="font-size: 0.78rem;">
+            Controls genetic search dynamics (population diversity, mutation magnitude, elite cloning). Note: Empirical 5-Seed Benchmarks remain strictly standardized to ensure reproducible comparisons.
+          </p>
+          <span class="setting-scope">[Applies to Future Training Generations]</span>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="modal-actions" style="margin-top: 20px; justify-content: space-between;">
+        <button id="btn-restore-defaults" class="btn-sm btn-danger">RESTORE DEFAULTS</button>
+        <button id="btn-close-settings-bottom" class="menu-btn btn-primary" style="padding: 10px 24px;">SAVE & CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 3: HOW IT WORKS & 5-SLIDE PRESENTATION
+       ====================================================================== -->
+  <div id="modal-how-it-works" class="modal-overlay">
+    <div class="modal-card modal-large">
+      <div class="modal-header-row">
+        <div>
+          <div class="logo-tagline">Academic Architecture & Defense Guide</div>
+          <h2 class="modal-title" style="font-size: 1.5rem;">HOW IT WORKS // SCIENTIFIC OVERVIEW</h2>
+        </div>
+        <button id="btn-close-how-it-works" class="close-btn">&times;</button>
+      </div>
+
+      <!-- Section 1: Overview -->
+      <div class="academic-section">
+        <h3>1. CORE RESEARCH CONCEPT</h3>
+        <p>
+          This project investigates autonomous multi-threat evasion within bounded 2D dynamical environments using Neuroevolution (Genetic Algorithms optimizing Feedforward Artificial Neural Networks). Rather than computing explicit gradient descent (backpropagation), the genetic algorithm optimizes neural network connection weights through evolutionary selection, reproduction, and stochastic mutation.
+        </p>
+      </div>
+
+      <!-- Section 2: Sensory Inputs & Topology -->
+      <div class="academic-section">
+        <h3>2. NEURAL NETWORK SENSORY PERCEPTION</h3>
+        <p>
+          The rocket controller is a Multi-Layer Perceptron (MLP) with <strong>20 normalized input features</strong>, <strong>16 hidden neurons</strong> (with <em>tanh</em> non-linear activations), and <strong>4 output units</strong> (logistic sigmoid) representing directional thrust vectors.
+        </p>
+        <div class="formula-box">
+          Input Vector [20]:<br />
+          • Rocket Normalized Position (x, y) & Velocity (vx, vy) [4]<br />
+          • Normalized Clearances to Arena Boundaries (Left, Right, Top, Bottom) [4]<br />
+          • 8-Directional 360° Proximity Radar Rays (d1 .. d8 &in; [0, 1]) [8]<br />
+          • Nearest Threat Relative Vector (&Delta;x, &Delta;y), Distance & Relative Velocity [4]<br /><br />
+          Output Vector [4] &rarr; Throttle: X = out[1] - out[0], Y = out[3] - out[2] &in; [-1.0, 1.0]
+        </div>
+      </div>
+
+      <!-- Section 3: Fitness Equation -->
+      <div class="academic-section">
+        <h3>3. MATHEMATICAL FITNESS FORMULATION</h3>
+        <p>
+          Fitness balances pure survival time with active tactical evasion, while explicitly penalizing passive wall camping and erratic control jitter:
+        </p>
+        <div class="formula-box">
+          Fitness = w<sub>time</sub> &middot; T<sub>survival</sub> + w<sub>dodge</sub> &middot; N<sub>near_misses</sub> + w<sub>wave</sub> &middot; W<sub>bonus</sub><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- w<sub>wall</sub> &middot; T<sub>wall_hug</sub> - w<sub>hit</sub> &middot; N<sub>wall_hit</sub> - w<sub>jitter</sub> &middot; J<sub>jitter</sub>
+        </div>
+        <p>
+          This formulation eliminates trivial exploit loops (such as sitting motionless in corners) and encourages dynamic centering and proactive hazard dodging.
+        </p>
+      </div>
+
+      <!-- Section 3B: Adaptive Arena & AI Insight -->
+      <div class="academic-section">
+        <h3>3B. ADAPTIVE ARENA & AI VISIBILITY MODES</h3>
+        <p>
+          <strong>Adaptive Arena Director:</strong> A rule-based game design system (completely decoupled from the machine learning models) that detects repetitive player habits—such as edge camping, circular looping, or stationary stagnation—and triggers telegraphed flushing waves (e.g. edge sweeps or crossfire pins) with advance warnings.
+        </p>
+        <p>
+          <strong>AI Visibility Modes:</strong> The interface provides an instant, seamless toggle between <em>Game View</em> (clean arcade graphics) and <em>AI Insight</em> (visualizing the controller's exact 180px radar scan, primary hazard trajectory, and chosen throttle action vector in real time without interrupting the run).
+        </p>
+      </div>
+
+      <!-- Section 4: 5-Slide Presentation Outline -->
+      <div class="academic-section">
+        <h3>4. FIVE-SLIDE COLLEGE PRESENTATION OUTLINE</h3>
+        <div class="slides-container">
+          <!-- Slide 1 -->
+          <div class="slide-card">
+            <div class="slide-num">SLIDE 1</div>
+            <div class="slide-heading">1. Problem Statement</div>
+            <ul class="slide-points">
+              <li><strong>Challenge:</strong> Real-time autonomous navigation and collision avoidance in bounded environments with unpredictable, multi-directional dynamic hazards.</li>
+              <li><strong>Objective:</strong> Develop an autonomous neuro-controller using Genetic Algorithms that learns evasive maneuvers without hand-crafted heuristics or human demonstrations.</li>
+              <li><strong>Research Question:</strong> How effectively can neuroevolution evolve evasion policies that outperform random actions and compete against classical potential-field algorithms?</li>
+            </ul>
+          </div>
+
+          <!-- Slide 2 -->
+          <div class="slide-card">
+            <div class="slide-num">SLIDE 2</div>
+            <div class="slide-heading">2. Methodology</div>
+            <ul class="slide-points">
+              <li><strong>Sensory Space:</strong> Compact 20-dimensional normalized observation vector (spatial position, velocities, boundary proximity, 8-ray omnidirectional radar, and nearest hazard trajectory).</li>
+              <li><strong>Controller Architecture:</strong> 20 &rarr; 16 &rarr; 4 feedforward network (404 evolvable weights and biases) with hyperbolic tangent activations.</li>
+              <li><strong>Evolutionary Operators:</strong> Elitism (preserving top 2 controllers), Tournament Selection (k=3), Uniform Crossover, and Additive Gaussian Mutation (&sigma; = 0.25).</li>
+              <li><strong>Reproducibility:</strong> Everyone in a generation faces the same repeatable hazard pattern; the pattern changes each generation. Separate comparisons use five shared test patterns.</li>
+            </ul>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="slide-card">
+            <div class="slide-num">SLIDE 3</div>
+            <div class="slide-heading">3. Research Paper</div>
+            <ul class="slide-points">
+              <li><strong>Domain:</strong> Evolutionary Robotics & Neuroevolution of Augmenting Topologies (NEAT / Genetic Algorithms for Control).</li>
+              <li><strong>Experimental Setup:</strong> Comparing three controller paradigms across 5 identical unseen test seeds: Random Walk, Artificial Potential Fields (Repulsion Heuristic), and Evolved GA Neuro-Controller.</li>
+              <li><strong>Paper Structure:</strong> Introduction &rarr; Dynamical System Modeling &rarr; Sensory Encoding & GA Formulation &rarr; Empirical Ablations & Results &rarr; Limitations & Conclusion.</li>
+            </ul>
+          </div>
+
+          <!-- Slide 4 -->
+          <div class="slide-card">
+            <div class="slide-num">SLIDE 4</div>
+            <div class="slide-heading">4. Result</div>
+            <ul class="slide-points">
+              <li><strong>Training progress:</strong> Show the actual best and average fitness values from the Evolution Lab.</li>
+              <li><strong>Comparison:</strong> Report measured survival and score for the random, rule-based, and evolved pilots across the same test patterns.</li>
+              <li><strong>Observation:</strong> Describe movement patterns you saw in the replay; avoid claiming a behavior unless it is visible in your results.</li>
+            </ul>
+          </div>
+
+          <!-- Slide 5 -->
+          <div class="slide-card">
+            <div class="slide-num">SLIDE 5</div>
+            <div class="slide-heading">5. Conclusion</div>
+            <ul class="slide-points">
+              <li><strong>Key Finding:</strong> Genetic algorithms successfully synthesize effective non-linear reactive controllers for multi-hazard evasion without backpropagation or labeled datasets.</li>
+              <li><strong>Scientific Limitations:</strong> Evolved controllers are bounded by the 2D kinematics and hazard distribution patterns of the simulation, with potential seed overfitting if generation diversity drops.</li>
+              <li><strong>Future Scope:</strong> Extending to 3D celestial navigation, variable threat physics, and hybrid Neuroevolution-Reinforcement Learning (PPO/DQN) paradigms.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

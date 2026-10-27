@@ -1,0 +1,19 @@
+{
+  "name": "voidrun-evasion-protocol",
+  "version": "1.0.0",
+  "description": "Multi-Threat Evasion using Genetic Algorithms in 2D Arenas - College Mini Project for Introduction to Machine Learning",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "genetic-algorithm",
+    "neuroevolution",
+    "machine-learning",
+    "canvas-2d",
+    "arcade-game"
+  ],
+  "author": "College ML Mini Project Team",
+  "license": "MIT"
+}
